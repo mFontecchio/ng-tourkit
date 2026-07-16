@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 
 import { prefersReducedMotion } from '../a11y/reduced-motion';
-import { easeInOutQuad } from './stage-tracker';
+import { easeOutQuad } from './stage-tracker';
 import { StageRect, stageSvgPath } from './stage-path';
 
 @Component({
@@ -56,7 +56,7 @@ export class TkTourOverlayComponent implements OnDestroy {
   readonly radius = input(8);
   readonly overlayColor = input('rgba(0,0,0,0.7)');
   readonly animate = input(true);
-  readonly animationDurationMs = input(400);
+  readonly animationDurationMs = input(300);
   readonly overlayClick = output<void>();
 
   private readonly viewport = signal({
@@ -119,10 +119,10 @@ export class TkTourOverlayComponent implements OnDestroy {
     const tick = (now: number): void => {
       const elapsed = Math.min(now - startedAt, duration);
       this.renderedStage.set({
-        x: easeInOutQuad(elapsed, previous.x, next.x - previous.x, duration),
-        y: easeInOutQuad(elapsed, previous.y, next.y - previous.y, duration),
-        width: easeInOutQuad(elapsed, previous.width, next.width - previous.width, duration),
-        height: easeInOutQuad(elapsed, previous.height, next.height - previous.height, duration),
+        x: easeOutQuad(elapsed, previous.x, next.x - previous.x, duration),
+        y: easeOutQuad(elapsed, previous.y, next.y - previous.y, duration),
+        width: easeOutQuad(elapsed, previous.width, next.width - previous.width, duration),
+        height: easeOutQuad(elapsed, previous.height, next.height - previous.height, duration),
       });
 
       if (elapsed < duration) {

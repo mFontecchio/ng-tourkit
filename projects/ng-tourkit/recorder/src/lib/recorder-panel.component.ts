@@ -36,7 +36,7 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { 'data-tk-recorder': '', '[attr.aria-label]': '"Tour recorder"' },
   template: `
-    <div class="panel">
+    <div class="panel" [class.panel--collapsed]="collapsed()" [class.panel--closing]="closing()">
       <!-- Header -->
       <header class="panel-hdr">
         <svg class="panel-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -49,143 +49,153 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
         }
         <span class="hdr-spacer"></span>
         <span class="step-count-badge" title="{{ steps().length }} step(s)">{{ steps().length }}</span>
-        <button type="button" class="close-btn" (click)="closed.emit()" aria-label="Close recorder">
+        <button type="button" class="icon-hdr-btn" (click)="collapsed.set(!collapsed())" [attr.aria-label]="collapsed() ? 'Expand recorder' : 'Collapse recorder'" [attr.aria-expanded]="!collapsed()">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" [style.transform]="collapsed() ? 'rotate(180deg)' : 'none'" style="transition:transform 0.25s cubic-bezier(0.4,0,0.2,1)">
+            <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button type="button" class="close-btn" (click)="requestClose()" aria-label="Close recorder">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
             <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
           </svg>
         </button>
       </header>
 
-      <!-- Validation issues -->
-      @if (issues().length) {
-        <div class="issues-bar" role="alert">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style="flex-shrink:0;margin-top:1px">
-            <path d="M7 1.5L13 12H1L7 1.5z" fill="#fca5a5"/>
-            <path d="M7 5.5v3M7 10.5h.01" stroke="#991b1b" stroke-width="1.4" stroke-linecap="round"/>
-          </svg>
-          <ul class="issues-list">
-            @for (issue of issues(); track issue.path + issue.message) {
-              <li>{{ issue.path }} {{ issue.message }}</li>
-            }
-          </ul>
-        </div>
-      }
-
-      <!-- Pick hint -->
-      @if (capture.mode() === 'pick') {
-        <div class="pick-hint">
-          <span class="pick-pulse" aria-hidden="true"></span>
-          Click any element in the app — press <kbd>Esc</kbd> to cancel
-        </div>
-      }
-
-      <!-- Step form -->
-      @if (form(); as f) {
-        <form class="step-form" (submit)="saveStep($event)">
-          <div class="form-hdr">
-            <span class="form-title">{{ f.index === null ? 'New step' : 'Edit step' }}</span>
-            @if (f.quality) {
-              <span class="q-badge" [class]="'q-' + f.quality">{{ f.quality }}</span>
-            } @else {
-              <span class="q-badge q-modal">modal</span>
-            }
-          </div>
-          <div class="field">
-            <label class="field-lbl" for="tk-step-title">Title</label>
-            <input id="tk-step-title" class="field-input" [value]="f.title" (input)="patchForm({ title: text($event) })" placeholder="Step title" />
-          </div>
-          <div class="field">
-            <label class="field-lbl" for="tk-step-body">Body</label>
-            <textarea id="tk-step-body" class="field-input field-ta" [value]="f.body" (input)="patchForm({ body: text($event) })" placeholder="Step description"></textarea>
-          </div>
-          @if (f.target) {
-            <div class="field">
-              <label class="field-lbl" for="tk-step-side">Popover side</label>
-              <select id="tk-step-side" class="field-select" [value]="f.side" (change)="patchForm({ side: side($event) })">
-                @for (side of sideOptions; track side) {
-                  <option [value]="side">{{ side }}</option>
+      <!-- Collapsible content -->
+      <div class="panel-collapsible">
+        <div class="panel-collapsible-inner">
+          <!-- Validation issues -->
+          @if (issues().length) {
+            <div class="issues-bar" role="alert">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style="flex-shrink:0;margin-top:1px">
+                <path d="M7 1.5L13 12H1L7 1.5z" fill="#fca5a5"/>
+                <path d="M7 5.5v3M7 10.5h.01" stroke="#991b1b" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              <ul class="issues-list">
+                @for (issue of issues(); track issue.path + issue.message) {
+                  <li>{{ issue.path }} {{ issue.message }}</li>
                 }
-              </select>
-            </div>
-            <label class="check-field">
-              <input type="checkbox" class="check-input" [checked]="f.clickAction" (change)="patchForm({ clickAction: checked($event) })" />
-              <span>Click element on Next</span>
-            </label>
-            <div class="field">
-              <label class="field-lbl" for="tk-step-wait">Wait timeout (ms)</label>
-              <input id="tk-step-wait" type="number" min="0" class="field-input" [value]="f.waitTimeout ?? ''" (input)="patchForm({ waitTimeout: numberOrNull($event) })" placeholder="None" />
+              </ul>
             </div>
           }
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary btn-sm">Save step</button>
-            <button type="button" class="btn btn-ghost btn-sm" (click)="cancelForm()">Cancel</button>
-          </div>
-        </form>
-      }
 
-      <!-- Scrollable body -->
-      <div class="panel-body">
-        <!-- Tour info -->
-        <section class="section">
-          <div class="field">
-            <label class="field-lbl" for="tk-tour-name">Tour name</label>
-            <input id="tk-tour-name" class="field-input" [value]="name()" (input)="setName($event)" placeholder="my-tour" />
-          </div>
-          <div class="field">
-            <label class="field-lbl" for="tk-tour-load">Load existing</label>
-            <select id="tk-tour-load" class="field-select" [value]="selectedTourId()" (change)="loadSelected($event)">
-              <option value="">Select a tour…</option>
-              @for (tour of tours(); track tour.id) {
-                <option [value]="tour.id">{{ tour.name }} v{{ tour.version }} ({{ tour.status }})</option>
+          <!-- Pick hint -->
+          @if (capture.mode() === 'pick') {
+            <div class="pick-hint">
+              <span class="pick-pulse" aria-hidden="true"></span>
+              Click any element in the app — press <kbd>Esc</kbd> to cancel
+            </div>
+          }
+
+          <!-- Step form -->
+          @if (form(); as f) {
+            <form class="step-form" (submit)="saveStep($event)">
+              <div class="form-hdr">
+                <span class="form-title">{{ f.index === null ? 'New step' : 'Edit step' }}</span>
+                @if (f.quality) {
+                  <span class="q-badge" [class]="'q-' + f.quality">{{ f.quality }}</span>
+                } @else {
+                  <span class="q-badge q-modal">modal</span>
+                }
+              </div>
+              <div class="field">
+                <label class="field-lbl" for="tk-step-title">Title</label>
+                <input id="tk-step-title" class="field-input" [value]="f.title" (input)="patchForm({ title: text($event) })" placeholder="Step title" />
+              </div>
+              <div class="field">
+                <label class="field-lbl" for="tk-step-body">Body</label>
+                <textarea id="tk-step-body" class="field-input field-ta" [value]="f.body" (input)="patchForm({ body: text($event) })" placeholder="Step description"></textarea>
+              </div>
+              @if (f.target) {
+                <div class="field">
+                  <label class="field-lbl" for="tk-step-side">Popover side</label>
+                  <select id="tk-step-side" class="field-select" [value]="f.side" (change)="patchForm({ side: side($event) })">
+                    @for (side of sideOptions; track side) {
+                      <option [value]="side">{{ side }}</option>
+                    }
+                  </select>
+                </div>
+                <label class="check-field">
+                  <input type="checkbox" class="check-input" [checked]="f.clickAction" (change)="patchForm({ clickAction: checked($event) })" />
+                  <span>Click element on Next</span>
+                </label>
+                <div class="field">
+                  <label class="field-lbl" for="tk-step-wait">Wait timeout (ms)</label>
+                  <input id="tk-step-wait" type="number" min="0" class="field-input" [value]="f.waitTimeout ?? ''" (input)="patchForm({ waitTimeout: numberOrNull($event) })" placeholder="None" />
+                </div>
               }
-            </select>
-          </div>
-        </section>
-
-        <!-- Steps -->
-        <section class="section">
-          <div class="section-hdr">
-            <span class="section-title">
-              Steps
-              <span class="count-chip">{{ steps().length }}</span>
-            </span>
-            <div class="row">
-              <button type="button" class="btn btn-sm" (click)="addStep()" [disabled]="capture.mode() === 'pick'">+ Element</button>
-              <button type="button" class="btn btn-sm" (click)="addModalStep()">+ Modal</button>
-            </div>
-          </div>
-          @if (steps().length === 0) {
-            <p class="empty-steps">No steps yet — add your first above.</p>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-sm">Save step</button>
+                <button type="button" class="btn btn-ghost btn-sm" (click)="cancelForm()">Cancel</button>
+              </div>
+            </form>
           }
-          <ol class="steps-list" aria-label="Tour steps">
-            @for (step of steps(); track step.id; let i = $index) {
-              <li class="step-card" [class]="'step-card qc-' + stepQuality(step)">
-                <div class="step-meta">
-                  <span class="step-num" aria-hidden="true">{{ i + 1 }}</span>
-                  <span class="step-title-text" [title]="step.title || '(untitled)'">{{ step.title || '(untitled)' }}</span>
-                  <span class="q-badge" [class]="'q-' + stepQuality(step)">{{ stepQuality(step) }}</span>
-                </div>
-                <div class="step-actions">
-                  <button type="button" class="icon-btn" (click)="moveStep(i, -1)" [disabled]="i === 0" aria-label="Move up">↑</button>
-                  <button type="button" class="icon-btn" (click)="moveStep(i, 1)" [disabled]="i === steps().length - 1" aria-label="Move down">↓</button>
-                  <button type="button" class="icon-btn" (click)="editStep(i)" aria-label="Edit step">✎</button>
-                  <button type="button" class="icon-btn icon-btn-danger" (click)="deleteStep(i)" aria-label="Delete step">✕</button>
-                </div>
-              </li>
-            }
-          </ol>
-        </section>
-      </div>
 
-      <!-- Footer -->
-      <footer class="panel-footer">
-        <button type="button" class="btn btn-ghost btn-sm" (click)="newTour()">New tour</button>
-        <div class="footer-actions">
-          <button type="button" class="btn btn-ghost btn-sm" (click)="preview()">Preview</button>
-          <button type="button" class="btn btn-sm" (click)="saveDraft()">Save draft</button>
-          <button type="button" class="btn btn-primary btn-sm" (click)="publish()">Publish</button>
+          <!-- Scrollable body -->
+          <div class="panel-body">
+            <!-- Tour info -->
+            <section class="section">
+              <div class="field">
+                <label class="field-lbl" for="tk-tour-name">Tour name</label>
+                <input id="tk-tour-name" class="field-input" [value]="name()" (input)="setName($event)" placeholder="my-tour" />
+              </div>
+              <div class="field">
+                <label class="field-lbl" for="tk-tour-load">Load existing</label>
+                <select id="tk-tour-load" class="field-select" [value]="selectedTourId()" (change)="loadSelected($event)">
+                  <option value="">Select a tour…</option>
+                  @for (tour of tours(); track tour.id) {
+                    <option [value]="tour.id">{{ tour.name }} v{{ tour.version }} ({{ tour.status }})</option>
+                  }
+                </select>
+              </div>
+            </section>
+
+            <!-- Steps -->
+            <section class="section">
+              <div class="section-hdr">
+                <span class="section-title">
+                  Steps
+                  <span class="count-chip">{{ steps().length }}</span>
+                </span>
+                <div class="row">
+                  <button type="button" class="btn btn-sm" (click)="addStep()" [disabled]="capture.mode() === 'pick'">+ Element</button>
+                  <button type="button" class="btn btn-sm" (click)="addModalStep()">+ Modal</button>
+                </div>
+              </div>
+              @if (steps().length === 0) {
+                <p class="empty-steps">No steps yet — add your first above.</p>
+              }
+              <ol class="steps-list" aria-label="Tour steps">
+                @for (step of steps(); track step.id; let i = $index) {
+                  <li class="step-card">
+                    <div class="step-meta">
+                      <span class="step-num" aria-hidden="true">{{ i + 1 }}</span>
+                      <span class="step-title-text" [title]="step.title || '(untitled)'">{{ step.title || '(untitled)' }}</span>
+                      <span class="q-badge" [class]="'q-' + stepQuality(step)">{{ stepQuality(step) }}</span>
+                    </div>
+                    <div class="step-actions">
+                      <button type="button" class="icon-btn" (click)="moveStep(i, -1)" [disabled]="i === 0" aria-label="Move up">↑</button>
+                      <button type="button" class="icon-btn" (click)="moveStep(i, 1)" [disabled]="i === steps().length - 1" aria-label="Move down">↓</button>
+                      <button type="button" class="icon-btn" (click)="editStep(i)" aria-label="Edit step">✎</button>
+                      <button type="button" class="icon-btn icon-btn-danger" (click)="deleteStep(i)" aria-label="Delete step">✕</button>
+                    </div>
+                  </li>
+                }
+              </ol>
+            </section>
+          </div>
+
+          <!-- Footer -->
+          <footer class="panel-footer">
+            <button type="button" class="btn btn-ghost btn-sm" (click)="newTour()">New tour</button>
+            <div class="footer-actions">
+              <button type="button" class="btn btn-ghost btn-sm" (click)="preview()">Preview</button>
+              <button type="button" class="btn btn-sm" (click)="saveDraft()">Save draft</button>
+              <button type="button" class="btn btn-primary btn-sm" (click)="publish()">Publish</button>
+            </div>
+          </footer>
         </div>
-      </footer>
+      </div>
     </div>
   `,
   styles: [
@@ -212,6 +222,40 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
         box-shadow: 0 4px 6px -1px rgba(0,0,0,0.10), 0 16px 40px -4px rgba(0,0,0,0.18);
         border: 1px solid rgba(0,0,0,0.08);
         overflow: hidden;
+        animation: panel-in 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      }
+      .panel--closing {
+        animation: panel-out 0.22s cubic-bezier(0.4, 0, 1, 1) both;
+        pointer-events: none;
+      }
+      @keyframes panel-in {
+        from { opacity: 0; transform: translateY(16px) scale(0.96); }
+        to   { opacity: 1; transform: none; }
+      }
+      @keyframes panel-out {
+        from { opacity: 1; transform: none; }
+        to   { opacity: 0; transform: translateY(12px) scale(0.97); }
+      }
+
+      /* ── Collapse ────────────────────────────────────────── */
+      .panel-collapsible {
+        display: grid;
+        grid-template-rows: 1fr;
+        transition: grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .panel--collapsed .panel-collapsible {
+        grid-template-rows: 0fr;
+      }
+      .panel-collapsible-inner {
+        overflow: hidden;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .panel { animation-duration: 0.01ms !important; }
+        .panel-collapsible { transition-duration: 0.01ms !important; }
       }
 
       /* ── Header ──────────────────────────────────────────── */
@@ -252,8 +296,24 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
         animation: rec-blink 1.2s step-start infinite;
       }
       @keyframes rec-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
-      .close-btn {
+      .icon-hdr-btn {
         display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border: none;
+        border-radius: 8px;
+        background: rgba(255,255,255,0.12);
+        color: rgba(255,255,255,0.9);
+        cursor: pointer;
+        transition: background 0.13s;
+        flex-shrink: 0;
+      }
+      .icon-hdr-btn:hover { background: rgba(255,255,255,0.22); }
+      .icon-hdr-btn:active { background: rgba(255,255,255,0.06); }
+
+      .close-btn {        display: flex;
         align-items: center;
         justify-content: center;
         width: 28px;
@@ -438,16 +498,11 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
         gap: 6px;
         padding: 9px 11px;
         border: 1px solid #e5e7eb;
-        border-left: 3px solid #d1d5db;
         border-radius: 8px;
         background: #fff;
         transition: box-shadow 0.12s;
       }
       .step-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
-      .qc-stable { border-left-color: var(--tk-recorder-stable, #15803d); }
-      .qc-ok { border-left-color: var(--tk-recorder-ok, #b45309); }
-      .qc-fragile { border-left-color: var(--tk-recorder-fragile, #b91c1c); }
-      .qc-modal { border-left-color: #1d4ed8; }
       .step-meta {
         display: flex;
         align-items: center;
@@ -568,6 +623,9 @@ export class TkTourRecorderPanelComponent {
   private readonly router = inject(Router, { optional: true });
 
   readonly closed = output<void>();
+  readonly collapsed = signal(false);
+  readonly closing = signal(false);
+  readonly isDirty = signal(false);
   readonly capture = this.captureService;
   readonly sideOptions = sides;
   readonly id = signal(this.nextId());
@@ -592,6 +650,18 @@ export class TkTourRecorderPanelComponent {
       const picked = this.captureService.lastPicked();
       if (this.waitingForPick && picked) this.openPickedForm(picked);
     });
+    effect(() => {
+      this.steps(); // track
+      this.isDirty.set(true);
+    }, { allowSignalWrites: true });
+  }
+
+  requestClose(): void {
+    if (this.isDirty() && this.steps().length > 0 && !confirm('You have unsaved changes. Close without saving?')) {
+      return;
+    }
+    this.closing.set(true);
+    setTimeout(() => this.closed.emit(), 220);
   }
 
   addStep(): void {
@@ -675,6 +745,7 @@ export class TkTourRecorderPanelComponent {
     if (!tour) return;
     await this.storage.saveTour(tour);
     this.status.set('draft');
+    this.isDirty.set(false);
     await this.reloadTours();
   }
 
@@ -687,6 +758,7 @@ export class TkTourRecorderPanelComponent {
     this.version.set(nextVersion);
     this.loadedVersion.set(nextVersion);
     this.wasPublished.set(true);
+    this.isDirty.set(false);
     await this.reloadTours();
   }
 
@@ -708,6 +780,7 @@ export class TkTourRecorderPanelComponent {
     this.wasPublished.set(tour.status === 'published');
     this.form.set(null);
     this.issues.set([]);
+    this.isDirty.set(false);
   }
 
   loadSelected(event: Event): void {
@@ -729,6 +802,7 @@ export class TkTourRecorderPanelComponent {
     this.selectedTourId.set('');
     this.loadedVersion.set(null);
     this.wasPublished.set(false);
+    this.isDirty.set(false);
   }
 
   patchForm(patch: Partial<StepForm>): void {

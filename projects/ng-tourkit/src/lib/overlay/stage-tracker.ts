@@ -19,6 +19,17 @@ export function easeInOutQuad(
   return -delta / 2 * (time * (time - 2 * halfDuration) - halfDuration * halfDuration) / (halfDuration * halfDuration) + start;
 }
 
+/** ponytail: easeOut feels snappier than easeInOut for highlight movement — hits target fast, settles gently */
+export function easeOutQuad(
+  elapsed: number,
+  start: number,
+  delta: number,
+  duration: number,
+): number {
+  const t = elapsed / duration;
+  return -delta * t * (t - 2) + start;
+}
+
 @Injectable({ providedIn: 'root' })
 export class TkStageTracker {
   private readonly rect = signal<StageRect>({ x: 0, y: 0, width: 0, height: 0 });
