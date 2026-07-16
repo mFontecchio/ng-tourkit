@@ -36,107 +36,157 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { 'data-tk-recorder': '', '[attr.aria-label]': '"Tour recorder"' },
   template: `
-    <section class="panel">
-      <header>
-        <strong>Tour recorder</strong>
-        <button type="button" (click)="closed.emit()">×</button>
+    <div class="panel">
+      <!-- Header -->
+      <header class="panel-hdr">
+        <svg class="panel-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="8" cy="8" r="6" fill="currentColor" opacity="0.2"/>
+          <circle cx="8" cy="8" r="3.5" fill="currentColor"/>
+        </svg>
+        <span class="panel-title">Tour Recorder</span>
+        @if (capture.mode() === 'pick') {
+          <span class="rec-pill">REC</span>
+        }
+        <span class="hdr-spacer"></span>
+        <span class="step-count-badge" title="{{ steps().length }} step(s)">{{ steps().length }}</span>
+        <button type="button" class="close-btn" (click)="closed.emit()" aria-label="Close recorder">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+          </svg>
+        </button>
       </header>
 
+      <!-- Validation issues -->
       @if (issues().length) {
-        <ul class="issues">
-          @for (issue of issues(); track issue.path + issue.message) {
-            <li>{{ issue.path }} {{ issue.message }}</li>
-          }
-        </ul>
+        <div class="issues-bar" role="alert">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style="flex-shrink:0;margin-top:1px">
+            <path d="M7 1.5L13 12H1L7 1.5z" fill="#fca5a5"/>
+            <path d="M7 5.5v3M7 10.5h.01" stroke="#991b1b" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          <ul class="issues-list">
+            @for (issue of issues(); track issue.path + issue.message) {
+              <li>{{ issue.path }} {{ issue.message }}</li>
+            }
+          </ul>
+        </div>
       }
 
-      <label>
-        Name
-        <input [value]="name()" (input)="setName($event)" />
-      </label>
-
-      <div class="row">
-        <button type="button" (click)="addStep()">Add step</button>
-        <button type="button" (click)="addModalStep()">Add modal step</button>
-      </div>
-
-      <label>
-        Load existing tour
-        <select [value]="selectedTourId()" (change)="loadSelected($event)">
-          <option value="">Select…</option>
-          @for (tour of tours(); track tour.id) {
-            <option [value]="tour.id">{{ tour.name }} v{{ tour.version }} ({{ tour.status }})</option>
-          }
-        </select>
-      </label>
-
+      <!-- Pick hint -->
       @if (capture.mode() === 'pick') {
-        <p class="hint">Click a target in the app.</p>
+        <div class="pick-hint">
+          <span class="pick-pulse" aria-hidden="true"></span>
+          Click any element in the app — press <kbd>Esc</kbd> to cancel
+        </div>
       }
 
+      <!-- Step form -->
       @if (form(); as f) {
         <form class="step-form" (submit)="saveStep($event)">
-          <strong>{{ f.index === null ? 'New step' : 'Edit step' }}</strong>
-          @if (f.quality) {
-            <span class="quality" [class]="f.quality">{{ f.quality }}</span>
-          } @else {
-            <span class="quality modal">modal</span>
-          }
-          <label>
-            Title
-            <input [value]="f.title" (input)="patchForm({ title: text($event) })" />
-          </label>
-          <label>
-            Body
-            <textarea [value]="f.body" (input)="patchForm({ body: text($event) })"></textarea>
-          </label>
+          <div class="form-hdr">
+            <span class="form-title">{{ f.index === null ? 'New step' : 'Edit step' }}</span>
+            @if (f.quality) {
+              <span class="q-badge" [class]="'q-' + f.quality">{{ f.quality }}</span>
+            } @else {
+              <span class="q-badge q-modal">modal</span>
+            }
+          </div>
+          <div class="field">
+            <label class="field-lbl" for="tk-step-title">Title</label>
+            <input id="tk-step-title" class="field-input" [value]="f.title" (input)="patchForm({ title: text($event) })" placeholder="Step title" />
+          </div>
+          <div class="field">
+            <label class="field-lbl" for="tk-step-body">Body</label>
+            <textarea id="tk-step-body" class="field-input field-ta" [value]="f.body" (input)="patchForm({ body: text($event) })" placeholder="Step description"></textarea>
+          </div>
           @if (f.target) {
-            <label>
-              Side
-              <select [value]="f.side" (change)="patchForm({ side: side($event) })">
+            <div class="field">
+              <label class="field-lbl" for="tk-step-side">Popover side</label>
+              <select id="tk-step-side" class="field-select" [value]="f.side" (change)="patchForm({ side: side($event) })">
                 @for (side of sideOptions; track side) {
                   <option [value]="side">{{ side }}</option>
                 }
               </select>
+            </div>
+            <label class="check-field">
+              <input type="checkbox" class="check-input" [checked]="f.clickAction" (change)="patchForm({ clickAction: checked($event) })" />
+              <span>Click element on Next</span>
             </label>
-            <label class="check">
-              <input type="checkbox" [checked]="f.clickAction" (change)="patchForm({ clickAction: checked($event) })" />
-              click this element on Next
-            </label>
-            <label>
-              Wait timeout ms
-              <input type="number" min="0" [value]="f.waitTimeout ?? ''" (input)="patchForm({ waitTimeout: numberOrNull($event) })" />
-            </label>
+            <div class="field">
+              <label class="field-lbl" for="tk-step-wait">Wait timeout (ms)</label>
+              <input id="tk-step-wait" type="number" min="0" class="field-input" [value]="f.waitTimeout ?? ''" (input)="patchForm({ waitTimeout: numberOrNull($event) })" placeholder="None" />
+            </div>
           }
-          <div class="row">
-            <button type="submit">Save step</button>
-            <button type="button" (click)="cancelForm()">Cancel</button>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-sm">Save step</button>
+            <button type="button" class="btn btn-ghost btn-sm" (click)="cancelForm()">Cancel</button>
           </div>
         </form>
       }
 
-      <ol class="steps">
-        @for (step of steps(); track step.id; let i = $index) {
-          <li>
-            <span>{{ i + 1 }}. {{ step.title || '(untitled)' }}</span>
-            <span class="quality" [class]="stepQuality(step)">{{ stepQuality(step) }}</span>
-            <div class="row">
-              <button type="button" (click)="moveStep(i, -1)" [disabled]="i === 0">↑</button>
-              <button type="button" (click)="moveStep(i, 1)" [disabled]="i === steps().length - 1">↓</button>
-              <button type="button" (click)="editStep(i)">Edit</button>
-              <button type="button" (click)="deleteStep(i)">Delete</button>
-            </div>
-          </li>
-        }
-      </ol>
+      <!-- Scrollable body -->
+      <div class="panel-body">
+        <!-- Tour info -->
+        <section class="section">
+          <div class="field">
+            <label class="field-lbl" for="tk-tour-name">Tour name</label>
+            <input id="tk-tour-name" class="field-input" [value]="name()" (input)="setName($event)" placeholder="my-tour" />
+          </div>
+          <div class="field">
+            <label class="field-lbl" for="tk-tour-load">Load existing</label>
+            <select id="tk-tour-load" class="field-select" [value]="selectedTourId()" (change)="loadSelected($event)">
+              <option value="">Select a tour…</option>
+              @for (tour of tours(); track tour.id) {
+                <option [value]="tour.id">{{ tour.name }} v{{ tour.version }} ({{ tour.status }})</option>
+              }
+            </select>
+          </div>
+        </section>
 
-      <footer class="row">
-        <button type="button" (click)="preview()">Preview</button>
-        <button type="button" (click)="saveDraft()">Save draft</button>
-        <button type="button" (click)="publish()">Publish</button>
-        <button type="button" (click)="newTour()">New tour</button>
+        <!-- Steps -->
+        <section class="section">
+          <div class="section-hdr">
+            <span class="section-title">
+              Steps
+              <span class="count-chip">{{ steps().length }}</span>
+            </span>
+            <div class="row">
+              <button type="button" class="btn btn-sm" (click)="addStep()" [disabled]="capture.mode() === 'pick'">+ Element</button>
+              <button type="button" class="btn btn-sm" (click)="addModalStep()">+ Modal</button>
+            </div>
+          </div>
+          @if (steps().length === 0) {
+            <p class="empty-steps">No steps yet — add your first above.</p>
+          }
+          <ol class="steps-list" aria-label="Tour steps">
+            @for (step of steps(); track step.id; let i = $index) {
+              <li class="step-card" [class]="'step-card qc-' + stepQuality(step)">
+                <div class="step-meta">
+                  <span class="step-num" aria-hidden="true">{{ i + 1 }}</span>
+                  <span class="step-title-text" [title]="step.title || '(untitled)'">{{ step.title || '(untitled)' }}</span>
+                  <span class="q-badge" [class]="'q-' + stepQuality(step)">{{ stepQuality(step) }}</span>
+                </div>
+                <div class="step-actions">
+                  <button type="button" class="icon-btn" (click)="moveStep(i, -1)" [disabled]="i === 0" aria-label="Move up">↑</button>
+                  <button type="button" class="icon-btn" (click)="moveStep(i, 1)" [disabled]="i === steps().length - 1" aria-label="Move down">↓</button>
+                  <button type="button" class="icon-btn" (click)="editStep(i)" aria-label="Edit step">✎</button>
+                  <button type="button" class="icon-btn icon-btn-danger" (click)="deleteStep(i)" aria-label="Delete step">✕</button>
+                </div>
+              </li>
+            }
+          </ol>
+        </section>
+      </div>
+
+      <!-- Footer -->
+      <footer class="panel-footer">
+        <button type="button" class="btn btn-ghost btn-sm" (click)="newTour()">New tour</button>
+        <div class="footer-actions">
+          <button type="button" class="btn btn-ghost btn-sm" (click)="preview()">Preview</button>
+          <button type="button" class="btn btn-sm" (click)="saveDraft()">Save draft</button>
+          <button type="button" class="btn btn-primary btn-sm" (click)="publish()">Publish</button>
+        </div>
       </footer>
-    </section>
+    </div>
   `,
   styles: [
     `
@@ -145,94 +195,369 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
         right: 16px;
         bottom: 16px;
         z-index: 10003;
-        font-family: system-ui, sans-serif;
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        font-size: 13px;
+        line-height: 1.45;
         color: var(--tk-recorder-text, #111827);
       }
+
+      /* ── Panel shell ─────────────────────────────────────── */
       .panel {
-        width: var(--tk-recorder-width, 320px);
-        max-height: 70vh;
-        overflow: auto;
-        display: grid;
-        gap: 10px;
-        padding: 12px;
-        border: 1px solid var(--tk-recorder-border, #d1d5db);
-        border-radius: 12px;
+        width: var(--tk-recorder-width, 360px);
+        max-height: 82vh;
+        display: flex;
+        flex-direction: column;
+        border-radius: 14px;
         background: var(--tk-recorder-bg, #fff);
-        box-shadow: 0 20px 40px #0003;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.10), 0 16px 40px -4px rgba(0,0,0,0.18);
+        border: 1px solid rgba(0,0,0,0.08);
+        overflow: hidden;
       }
-      header,
-      .row,
-      footer {
-        display: flex;
-        gap: 6px;
-        align-items: center;
-      }
-      header {
-        justify-content: space-between;
-      }
-      label,
-      .step-form {
-        display: grid;
-        gap: 4px;
-      }
-      input,
-      textarea,
-      select,
-      button {
-        font: inherit;
-      }
-      textarea {
-        min-height: 56px;
-        resize: vertical;
-      }
-      button {
-        border: 1px solid var(--tk-recorder-border, #d1d5db);
-        border-radius: 8px;
-        background: var(--tk-recorder-button, #f9fafb);
-        padding: 4px 8px;
-      }
-      .check {
+
+      /* ── Header ──────────────────────────────────────────── */
+      .panel-hdr {
         display: flex;
         align-items: center;
-        gap: 6px;
-      }
-      .issues {
-        margin: 0;
-        padding: 8px 8px 8px 24px;
-        border-radius: 8px;
-        background: #fef2f2;
-        color: #991b1b;
-      }
-      .hint {
-        margin: 0;
-        color: #1d4ed8;
-      }
-      .steps {
-        margin: 0;
-        padding-left: 20px;
-      }
-      .steps li {
-        margin: 8px 0;
-      }
-      .quality {
-        display: inline-block;
-        margin-left: 4px;
-        padding: 1px 6px;
-        border-radius: 999px;
+        gap: 8px;
+        padding: 11px 14px;
+        background: linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 100%);
         color: #fff;
+        flex-shrink: 0;
+        user-select: none;
+      }
+      .panel-icon { display: flex; color: rgba(255,255,255,0.8); }
+      .panel-title { font-size: 13px; font-weight: 600; letter-spacing: 0.01em; }
+      .hdr-spacer { flex: 1; }
+      .step-count-badge {
         font-size: 11px;
         font-weight: 700;
+        background: rgba(255,255,255,0.18);
+        color: #fff;
+        min-width: 22px;
+        height: 22px;
+        padding: 0 6px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
-      .stable {
-        background: var(--tk-recorder-stable, #15803d);
+      .rec-pill {
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        background: #ef4444;
+        color: #fff;
+        padding: 2px 6px;
+        border-radius: 999px;
+        animation: rec-blink 1.2s step-start infinite;
       }
-      .ok,
-      .modal {
-        background: var(--tk-recorder-ok, #b45309);
+      @keyframes rec-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+      .close-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border: none;
+        border-radius: 8px;
+        background: rgba(255,255,255,0.12);
+        color: rgba(255,255,255,0.9);
+        cursor: pointer;
+        transition: background 0.13s;
+        flex-shrink: 0;
       }
-      .fragile {
-        background: var(--tk-recorder-fragile, #b91c1c);
+      .close-btn:hover { background: rgba(255,255,255,0.22); }
+      .close-btn:active { background: rgba(255,255,255,0.06); }
+
+      /* ── Issues bar ──────────────────────────────────────── */
+      .issues-bar {
+        display: flex;
+        gap: 8px;
+        padding: 10px 14px;
+        background: #fef2f2;
+        border-bottom: 1px solid #fecaca;
+        color: #991b1b;
+        font-size: 12px;
+        flex-shrink: 0;
       }
+      .issues-list { margin: 0; padding: 0; list-style: none; }
+      .issues-list li + li { margin-top: 3px; }
+
+      /* ── Pick hint ───────────────────────────────────────── */
+      .pick-hint {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        background: #eff6ff;
+        border-bottom: 1px solid #bfdbfe;
+        color: #1e40af;
+        font-size: 12px;
+        flex-shrink: 0;
+      }
+      .pick-pulse {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #3b82f6;
+        flex-shrink: 0;
+        animation: pulse-dot 1.3s ease-in-out infinite;
+      }
+      @keyframes pulse-dot {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.5); }
+        50% { box-shadow: 0 0 0 7px rgba(59,130,246,0); }
+      }
+      kbd {
+        font: inherit;
+        font-size: 11px;
+        font-weight: 600;
+        background: #dbeafe;
+        border: 1px solid #93c5fd;
+        border-radius: 4px;
+        padding: 1px 5px;
+      }
+
+      /* ── Step form ───────────────────────────────────────── */
+      .step-form {
+        padding: 12px 14px;
+        background: #f8fafc;
+        border-bottom: 1px solid #e5e7eb;
+        flex-shrink: 0;
+      }
+      .form-hdr {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .form-title { font-size: 13px; font-weight: 600; color: #111827; }
+      .form-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+      /* ── Scrollable body ─────────────────────────────────── */
+      .panel-body {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scroll-behavior: smooth;
+      }
+      .panel-body::-webkit-scrollbar { width: 4px; }
+      .panel-body::-webkit-scrollbar-track { background: transparent; }
+      .panel-body::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+
+      /* ── Sections ────────────────────────────────────────── */
+      .section {
+        padding: 12px 14px;
+        border-bottom: 1px solid #f3f4f6;
+      }
+      .section:last-child { border-bottom: none; }
+      .section-hdr {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+      .section-title {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #6b7280;
+      }
+      .count-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 999px;
+        background: #e5e7eb;
+        color: #374151;
+        font-size: 11px;
+        font-weight: 700;
+        margin-left: 5px;
+        text-transform: none;
+        letter-spacing: 0;
+        vertical-align: middle;
+      }
+
+      /* ── Fields ──────────────────────────────────────────── */
+      .field { display: grid; gap: 4px; margin-bottom: 8px; }
+      .field:last-child { margin-bottom: 0; }
+      .field-lbl { font-size: 11px; font-weight: 600; color: #374151; }
+      .field-input,
+      .field-select {
+        font: inherit;
+        font-size: 13px;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 6px 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: #f9fafb;
+        color: #111827;
+        outline: none;
+        transition: border-color 0.14s, box-shadow 0.14s, background 0.14s;
+      }
+      .field-input:focus,
+      .field-select:focus {
+        border-color: #3b82f6;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+      }
+      .field-ta { min-height: 64px; resize: vertical; padding-top: 8px; }
+      .check-field {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        font-size: 12px;
+        color: #374151;
+      }
+      .check-input {
+        width: 15px;
+        height: 15px;
+        accent-color: #2563eb;
+        flex-shrink: 0;
+        cursor: pointer;
+      }
+
+      /* ── Steps list ──────────────────────────────────────── */
+      .empty-steps {
+        margin: 0 0 4px;
+        text-align: center;
+        padding: 14px 0;
+        color: #9ca3af;
+        font-size: 12px;
+      }
+      .steps-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+      .step-card {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 9px 11px;
+        border: 1px solid #e5e7eb;
+        border-left: 3px solid #d1d5db;
+        border-radius: 8px;
+        background: #fff;
+        transition: box-shadow 0.12s;
+      }
+      .step-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+      .qc-stable { border-left-color: var(--tk-recorder-stable, #15803d); }
+      .qc-ok { border-left-color: var(--tk-recorder-ok, #b45309); }
+      .qc-fragile { border-left-color: var(--tk-recorder-fragile, #b91c1c); }
+      .qc-modal { border-left-color: #1d4ed8; }
+      .step-meta {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+      }
+      .step-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #f3f4f6;
+        color: #374151;
+        font-size: 10px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .step-title-text {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 13px;
+        color: #111827;
+      }
+      .step-actions { display: flex; gap: 3px; }
+
+      /* ── Quality badges ──────────────────────────────────── */
+      .q-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 1px 7px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        flex-shrink: 0;
+      }
+      .q-stable { background: #dcfce7; color: #15803d; }
+      .q-ok { background: #fef3c7; color: #92400e; }
+      .q-fragile { background: #fee2e2; color: #b91c1c; }
+      .q-modal { background: #dbeafe; color: #1d4ed8; }
+
+      /* ── Buttons ─────────────────────────────────────────── */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 6px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: #fff;
+        color: #374151;
+        cursor: pointer;
+        transition: background 0.12s, border-color 0.12s, box-shadow 0.12s;
+        white-space: nowrap;
+      }
+      .btn:hover { background: #f9fafb; border-color: #9ca3af; }
+      .btn:active { background: #f3f4f6; }
+      .btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+      .btn-primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+      .btn-primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
+      .btn-primary:active { background: #1e40af; }
+      .btn-ghost { background: transparent; border-color: transparent; color: #6b7280; }
+      .btn-ghost:hover { background: #f3f4f6; border-color: transparent; color: #374151; }
+      .btn-sm { font-size: 12px; padding: 4px 10px; border-radius: 6px; }
+
+      /* ── Icon buttons ────────────────────────────────────── */
+      .icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        background: transparent;
+        color: #6b7280;
+        font: inherit;
+        font-size: 13px;
+        cursor: pointer;
+        transition: background 0.12s, color 0.12s, border-color 0.12s;
+      }
+      .icon-btn:hover { background: #f3f4f6; color: #111827; border-color: #e5e7eb; }
+      .icon-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+      .icon-btn-danger:hover { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+
+      /* ── Footer ──────────────────────────────────────────── */
+      .panel-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border-top: 1px solid #e5e7eb;
+        background: #f9fafb;
+        flex-shrink: 0;
+        gap: 6px;
+      }
+      .footer-actions { display: flex; gap: 6px; }
+
+      /* ── Utility ─────────────────────────────────────────── */
+      .row { display: flex; align-items: center; gap: 6px; }
     `,
   ],
 })

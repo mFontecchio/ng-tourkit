@@ -3,53 +3,103 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { TkTourAutoLauncher } from 'ng-tourkit';
 import { TkRecorderLauncher } from 'ng-tourkit/recorder';
 import { DemoUser } from './demo-user.service';
+import { IconComponent } from './icon.component';
 
 @Component({
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, IconComponent],
   template: `
-    <header>
-      <nav>
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
-        <a routerLink="/settings" routerLinkActive="active">Settings</a>
-        <a routerLink="/admin" routerLinkActive="active">Admin</a>
-        <a routerLink="/manage" routerLinkActive="active">Manage tours</a>
-      </nav>
-      <div class="controls">
-        <label>
-          User
-          <select [value]="user.userId()" (change)="switchUser($event)">
-            <option value="alice">alice</option>
-            <option value="bob">bob</option>
-          </select>
-        </label>
-        <label>
-          Role
-          <select [value]="user.roles()[0] || 'user'" (change)="switchRole($event)">
-            <option value="admin">admin</option>
-            <option value="pm">pm</option>
-            <option value="user">user</option>
-          </select>
-        </label>
-        <button (click)="recorder.open()">🎬 Recorder</button>
+    <div class="shell">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar__brand">
+          <app-icon name="beaker" size="1.5rem" class="sidebar__logo" />
+          <span class="sidebar__name">ng-tourkit</span>
+        </div>
+
+        <nav class="sidebar__nav">
+          <span class="sidebar__section-label">Workspace</span>
+
+          <a class="sidebar__item"
+             routerLink="/"
+             routerLinkActive="sidebar__item--active"
+             [routerLinkActiveOptions]="{ exact: true }">
+            <app-icon name="home" class="sidebar__icon" /> Dashboard
+          </a>
+
+          <a class="sidebar__item"
+             routerLink="/settings"
+             routerLinkActive="sidebar__item--active">
+            <app-icon name="cog" class="sidebar__icon" /> Settings
+          </a>
+
+          <a class="sidebar__item"
+             routerLink="/admin"
+             routerLinkActive="sidebar__item--active">
+            <app-icon name="shield" class="sidebar__icon" /> Admin
+          </a>
+
+          <span class="sidebar__section-label">Tours</span>
+
+          <a class="sidebar__item"
+             routerLink="/manage"
+             routerLinkActive="sidebar__item--active">
+            <app-icon name="folder" class="sidebar__icon" /> Manage Tours
+          </a>
+        </nav>
+
+        <div class="sidebar__footer">
+          <app-icon name="beaker" size=".875rem" class="sidebar__logo" />
+          <span class="sidebar__footer-text">Demo environment</span>
+        </div>
+      </aside>
+
+      <!-- Main area -->
+      <div class="main-area">
+        <!-- Top bar -->
+        <header class="topbar">
+          <div class="topbar__left">
+            <!-- ponytail: breadcrumb TBD; title injected by each page -->
+          </div>
+
+          <div class="topbar__right">
+            <!-- Demo user/role switcher -->
+            <div class="demo-pill">
+              <span class="demo-pill__label">Demo</span>
+              <select [value]="user.userId()" (change)="switchUser($event)" title="Switch user">
+                <option value="alice">alice</option>
+                <option value="bob">bob</option>
+              </select>
+              <select [value]="user.roles()[0] || 'user'" (change)="switchRole($event)" title="Switch role">
+                <option value="admin">admin</option>
+                <option value="pm">pm</option>
+                <option value="user">user</option>
+              </select>
+            </div>
+
+            <div class="topbar__divider"></div>
+
+            <button class="btn btn--primary btn--sm" (click)="recorder.open()">
+              <app-icon name="video" size="1rem" /> Record
+            </button>
+
+            <div class="topbar__user">
+              <div class="user-avatar">{{ user.userId().charAt(0).toUpperCase() }}</div>
+              <span class="user-name">{{ user.userId() }}</span>
+              <span class="badge badge--slate">{{ user.roles()[0] }}</span>
+            </div>
+          </div>
+        </header>
+
+        <!-- Page content -->
+        <main class="content">
+          <router-outlet />
+        </main>
       </div>
-    </header>
-    <main>
-      <router-outlet />
-    </main>
+    </div>
   `,
-  styles: `
-    header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 12px 24px; border-bottom: 1px solid #e5e7eb; gap: 16px; flex-wrap: wrap;
-    }
-    nav { display: flex; gap: 16px; }
-    nav a { text-decoration: none; color: #374151; }
-    nav a.active { font-weight: 700; color: #111827; }
-    .controls { display: flex; gap: 12px; align-items: center; }
-    main { padding: 24px; }
-  `,
+  styles: ``,
 })
 export class App {
   protected readonly user = inject(DemoUser);
@@ -58,7 +108,6 @@ export class App {
   private readonly router = inject(Router);
 
   constructor() {
-    // Check for pending auto-launch tours after each navigation.
     this.router.events.subscribe(e => {
       if (e instanceof NavigationEnd) void this.autoLauncher.checkAndLaunch();
     });
