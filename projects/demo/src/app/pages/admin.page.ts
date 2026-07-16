@@ -15,21 +15,27 @@ import { IconComponent } from '../icon.component';
       <app-icon name="warning" size="1.25rem" />
       <div>
         <strong>Admin zone</strong> — tour audience targeting is set to
-        <code style="font-size:.8125rem">roles: ["admin"]</code>. Switch the role
-        dropdown in the top bar to see how audience filtering behaves.
+        <code style="font-size:.8125rem">roles: ["admin"]</code>. Switch the role dropdown in the
+        top bar to see how audience filtering behaves.
       </div>
     </div>
 
     <!-- Admin action cards -->
     <div class="admin-grid" style="max-width:700px">
       <div class="card" style="padding:20px">
-        <div style="color:var(--c-slate-500);margin-bottom:10px"><app-icon name="trash" size="1.5rem" /></div>
+        <div style="color:var(--c-slate-500);margin-bottom:10px">
+          <app-icon name="trash" size="1.5rem" />
+        </div>
         <div style="font-weight:600;margin-bottom:4px">Purge audit log</div>
         <div style="font-size:.8125rem;color:var(--c-slate-500);margin-bottom:16px">
           Permanently remove all audit events older than 90 days.
         </div>
         @if (!confirmPurge()) {
-          <button class="btn btn--ghost btn--sm" data-tour="danger-btn" (click)="confirmPurge.set(true)">
+          <button
+            class="btn btn--ghost btn--sm"
+            data-tour="danger-btn"
+            (click)="confirmPurge.set(true)"
+          >
             Purge old events…
           </button>
         } @else {
@@ -41,14 +47,14 @@ import { IconComponent } from '../icon.component';
       </div>
 
       <div class="card" style="padding:20px">
-        <div style="color:var(--c-slate-500);margin-bottom:10px"><app-icon name="arrow-up-tray" size="1.5rem" /></div>
+        <div style="color:var(--c-slate-500);margin-bottom:10px">
+          <app-icon name="arrow-up-tray" size="1.5rem" />
+        </div>
         <div style="font-weight:600;margin-bottom:4px">Export all tours</div>
         <div style="font-size:.8125rem;color:var(--c-slate-500);margin-bottom:16px">
           Download the full tour library as a JSON backup.
         </div>
-        <button class="btn btn--ghost btn--sm" (click)="exportNote.set(true)">
-          Export JSON
-        </button>
+        <button class="btn btn--ghost btn--sm" (click)="exportNote.set(true)">Export JSON</button>
         @if (exportNote()) {
           <div class="alert alert--success" style="margin-top:10px;padding:8px 12px">
             <app-icon name="check" size="1rem" />
@@ -59,16 +65,24 @@ import { IconComponent } from '../icon.component';
     </div>
   `,
   styles: `
-    .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 600px) { .admin-grid { grid-template-columns: 1fr; } }
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 600px) {
+      .admin-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   `,
 })
 export class AdminPage {
   protected readonly confirmPurge = signal(false);
-  protected readonly exportNote   = signal(false);
+  protected readonly exportNote = signal(false);
 
   protected purge(): void {
     this.confirmPurge.set(false);
-    // ponytail: demo only — no real purge
+    //  demo only — no real purge
   }
 }

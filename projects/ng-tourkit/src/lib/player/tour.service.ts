@@ -172,7 +172,7 @@ export class TkTourService {
       el.click();
       return;
     }
-    // ponytail: synthetic events aren't "trusted" — enough for Angular forms, not for native-only listeners.
+    //  synthetic events aren't "trusted" — enough for Angular forms, not for native-only listeners.
     if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
       el.value = action.value;
       el.dispatchEvent(new Event('input', { bubbles: true }));
@@ -201,7 +201,11 @@ export class TkTourService {
     this.state.set('idle');
   }
 
-  private record(type: 'started' | 'step_viewed' | 'completed' | 'dismissed', stepId?: string, stepIndex?: number): Promise<void> {
+  private record(
+    type: 'started' | 'step_viewed' | 'completed' | 'dismissed',
+    stepId?: string,
+    stepIndex?: number,
+  ): Promise<void> {
     const tour = this.activeTour();
     if (!tour) return Promise.resolve();
     return this.audit
@@ -214,6 +218,6 @@ export class TkTourService {
         stepIndex,
         at: new Date().toISOString(),
       })
-      .catch(err => console.warn('[ng-tourkit] audit write failed', err));
+      .catch((err) => console.warn('[ng-tourkit] audit write failed', err));
   }
 }

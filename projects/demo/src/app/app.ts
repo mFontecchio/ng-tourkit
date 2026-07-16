@@ -21,30 +21,26 @@ import { IconComponent } from './icon.component';
         <nav class="sidebar__nav">
           <span class="sidebar__section-label">Workspace</span>
 
-          <a class="sidebar__item"
-             routerLink="/"
-             routerLinkActive="sidebar__item--active"
-             [routerLinkActiveOptions]="{ exact: true }">
+          <a
+            class="sidebar__item"
+            routerLink="/"
+            routerLinkActive="sidebar__item--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
             <app-icon name="home" class="sidebar__icon" /> Dashboard
           </a>
 
-          <a class="sidebar__item"
-             routerLink="/settings"
-             routerLinkActive="sidebar__item--active">
+          <a class="sidebar__item" routerLink="/settings" routerLinkActive="sidebar__item--active">
             <app-icon name="cog" class="sidebar__icon" /> Settings
           </a>
 
-          <a class="sidebar__item"
-             routerLink="/admin"
-             routerLinkActive="sidebar__item--active">
+          <a class="sidebar__item" routerLink="/admin" routerLinkActive="sidebar__item--active">
             <app-icon name="shield" class="sidebar__icon" /> Admin
           </a>
 
           <span class="sidebar__section-label">Tours</span>
 
-          <a class="sidebar__item"
-             routerLink="/manage"
-             routerLinkActive="sidebar__item--active">
+          <a class="sidebar__item" routerLink="/manage" routerLinkActive="sidebar__item--active">
             <app-icon name="folder" class="sidebar__icon" /> Manage Tours
           </a>
         </nav>
@@ -60,7 +56,7 @@ import { IconComponent } from './icon.component';
         <!-- Top bar -->
         <header class="topbar">
           <div class="topbar__left">
-            <!-- ponytail: breadcrumb TBD; title injected by each page -->
+            <!--  breadcrumb TBD; title injected by each page -->
           </div>
 
           <div class="topbar__right">
@@ -71,7 +67,11 @@ import { IconComponent } from './icon.component';
                 <option value="alice">alice</option>
                 <option value="bob">bob</option>
               </select>
-              <select [value]="user.roles()[0] || 'user'" (change)="switchRole($event)" title="Switch role">
+              <select
+                [value]="user.roles()[0] || 'user'"
+                (change)="switchRole($event)"
+                title="Switch role"
+              >
                 <option value="admin">admin</option>
                 <option value="pm">pm</option>
                 <option value="user">user</option>
@@ -108,7 +108,7 @@ export class App {
   private readonly router = inject(Router);
 
   constructor() {
-    this.router.events.subscribe(e => {
+    this.router.events.subscribe((e) => {
       if (e instanceof NavigationEnd) void this.autoLauncher.checkAndLaunch();
     });
   }

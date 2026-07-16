@@ -23,17 +23,24 @@ export class TkRecorderLauncher {
   private highlightRef: ComponentRef<TkRecorderHighlightComponent> | null = null;
 
   open(tourId?: string): void {
-    // ponytail: one recorder panel per app; add panel ids only if multi-window recording appears.
+    //  one recorder panel per app; add panel ids only if multi-window recording appears.
     if (this.panelRef) {
       if (tourId) void this.panelRef.instance.loadTour(tourId);
       return;
     }
-    this.highlightRef = createComponent(TkRecorderHighlightComponent, { environmentInjector: this.injector });
-    this.panelRef = createComponent(TkTourRecorderPanelComponent, { environmentInjector: this.injector });
+    this.highlightRef = createComponent(TkRecorderHighlightComponent, {
+      environmentInjector: this.injector,
+    });
+    this.panelRef = createComponent(TkTourRecorderPanelComponent, {
+      environmentInjector: this.injector,
+    });
     this.panelRef.instance.closed.subscribe(() => this.close());
     this.appRef.attachView(this.highlightRef.hostView);
     this.appRef.attachView(this.panelRef.hostView);
-    this.document.body.append(this.highlightRef.location.nativeElement, this.panelRef.location.nativeElement);
+    this.document.body.append(
+      this.highlightRef.location.nativeElement,
+      this.panelRef.location.nativeElement,
+    );
     if (tourId) void this.panelRef.instance.loadTour(tourId);
   }
 

@@ -76,7 +76,11 @@ interface TourAuditSummary {
                       {{ tour.name }}
                     </button>
                   </td>
-                  <td><span class="tk-manage__badge" [class]="'tk-manage__badge--' + tour.status">{{ tour.status }}</span></td>
+                  <td>
+                    <span class="tk-manage__badge" [class]="'tk-manage__badge--' + tour.status">{{
+                      tour.status
+                    }}</span>
+                  </td>
                   <td>{{ tour.version }}</td>
                   <td>{{ tour.steps.length }}</td>
                   <td>{{ tour.updatedAt }}</td>
@@ -108,7 +112,10 @@ interface TourAuditSummary {
                         <p>No audit events.</p>
                       } @else {
                         <ul>
-                          @for (event of events(tour.id); track event.at + event.type + (event.stepId ?? '')) {
+                          @for (
+                            event of events(tour.id);
+                            track event.at + event.type + (event.stepId ?? '')
+                          ) {
                             <li>
                               <strong>{{ event.type }}</strong>
                               <span>{{ event.userId }}</span>
@@ -128,180 +135,187 @@ interface TourAuditSummary {
       }
     </section>
   `,
-  styles: [`
-    :host {
-      --tk-manage-bg: #fff;
-      --tk-manage-border: #d9dee7;
-      --tk-manage-text: #172033;
-      --tk-manage-muted: #667085;
-      --tk-manage-accent: #2454d6;
-      --tk-manage-danger: #b42318;
-      --tk-manage-draft: #667085;
-      --tk-manage-published: #067647;
-      --tk-manage-archived: #93370d;
-      display: block;
-      color: var(--tk-manage-text);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
+  styles: [
+    `
+      :host {
+        --tk-manage-bg: #fff;
+        --tk-manage-border: #d9dee7;
+        --tk-manage-text: #172033;
+        --tk-manage-muted: #667085;
+        --tk-manage-accent: #2454d6;
+        --tk-manage-danger: #b42318;
+        --tk-manage-draft: #667085;
+        --tk-manage-published: #067647;
+        --tk-manage-archived: #93370d;
+        display: block;
+        color: var(--tk-manage-text);
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+      }
 
-    .tk-manage {
-      background: var(--tk-manage-bg);
-      border: 1px solid var(--tk-manage-border);
-      border-radius: 12px;
-      padding: 1rem;
-    }
+      .tk-manage {
+        background: var(--tk-manage-bg);
+        border: 1px solid var(--tk-manage-border);
+        border-radius: 12px;
+        padding: 1rem;
+      }
 
-    .tk-manage__header,
-    .tk-manage__tools,
-    .tk-manage__actions {
-      align-items: center;
-      display: flex;
-      gap: .5rem;
-    }
+      .tk-manage__header,
+      .tk-manage__tools,
+      .tk-manage__actions {
+        align-items: center;
+        display: flex;
+        gap: 0.5rem;
+      }
 
-    .tk-manage__header {
-      justify-content: space-between;
-      margin-bottom: .75rem;
-    }
+      .tk-manage__header {
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+      }
 
-    h2,
-    h3,
-    p {
-      margin: 0;
-    }
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
 
-    h2 {
-      font-size: 1.1rem;
-    }
+      h2 {
+        font-size: 1.1rem;
+      }
 
-    h3 {
-      font-size: .95rem;
-      margin-bottom: .5rem;
-    }
+      h3 {
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+      }
 
-    p,
-    td,
-    th {
-      font-size: .875rem;
-    }
+      p,
+      td,
+      th {
+        font-size: 0.875rem;
+      }
 
-    p {
-      color: var(--tk-manage-muted);
-    }
+      p {
+        color: var(--tk-manage-muted);
+      }
 
-    button,
-    .tk-manage__import {
-      background: #f8fafc;
-      border: 1px solid var(--tk-manage-border);
-      border-radius: 8px;
-      color: var(--tk-manage-text);
-      cursor: pointer;
-      font: inherit;
-      padding: .35rem .55rem;
-      white-space: nowrap;
-    }
+      button,
+      .tk-manage__import {
+        background: #f8fafc;
+        border: 1px solid var(--tk-manage-border);
+        border-radius: 8px;
+        color: var(--tk-manage-text);
+        cursor: pointer;
+        font: inherit;
+        padding: 0.35rem 0.55rem;
+        white-space: nowrap;
+      }
 
-    button:hover,
-    .tk-manage__import:hover {
-      border-color: var(--tk-manage-accent);
-    }
+      button:hover,
+      .tk-manage__import:hover {
+        border-color: var(--tk-manage-accent);
+      }
 
-    .tk-manage__import input {
-      display: none;
-    }
+      .tk-manage__import input {
+        display: none;
+      }
 
-    .tk-manage__error {
-      background: #fef3f2;
-      border: 1px solid #fecdca;
-      border-radius: 8px;
-      color: var(--tk-manage-danger);
-      margin-bottom: .75rem;
-      padding: .5rem .75rem;
-    }
+      .tk-manage__error {
+        background: #fef3f2;
+        border: 1px solid #fecdca;
+        border-radius: 8px;
+        color: var(--tk-manage-danger);
+        margin-bottom: 0.75rem;
+        padding: 0.5rem 0.75rem;
+      }
 
-    .tk-manage__empty {
-      padding: 1rem 0;
-    }
+      .tk-manage__empty {
+        padding: 1rem 0;
+      }
 
-    .tk-manage__table-wrap {
-      overflow-x: auto;
-    }
+      .tk-manage__table-wrap {
+        overflow-x: auto;
+      }
 
-    .tk-manage__table {
-      border-collapse: collapse;
-      min-width: 900px;
-      width: 100%;
-    }
+      .tk-manage__table {
+        border-collapse: collapse;
+        min-width: 900px;
+        width: 100%;
+      }
 
-    th,
-    td {
-      border-top: 1px solid var(--tk-manage-border);
-      padding: .55rem;
-      text-align: left;
-      vertical-align: top;
-    }
+      th,
+      td {
+        border-top: 1px solid var(--tk-manage-border);
+        padding: 0.55rem;
+        text-align: left;
+        vertical-align: top;
+      }
 
-    th {
-      color: var(--tk-manage-muted);
-      font-weight: 600;
-    }
+      th {
+        color: var(--tk-manage-muted);
+        font-weight: 600;
+      }
 
-    .tk-manage__link {
-      background: transparent;
-      border: 0;
-      color: var(--tk-manage-accent);
-      padding: 0;
-      text-align: left;
-    }
+      .tk-manage__link {
+        background: transparent;
+        border: 0;
+        color: var(--tk-manage-accent);
+        padding: 0;
+        text-align: left;
+      }
 
-    .tk-manage__badge {
-      border-radius: 999px;
-      color: #fff;
-      display: inline-block;
-      font-size: .75rem;
-      font-weight: 700;
-      line-height: 1;
-      padding: .25rem .5rem;
-    }
+      .tk-manage__badge {
+        border-radius: 999px;
+        color: #fff;
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        line-height: 1;
+        padding: 0.25rem 0.5rem;
+      }
 
-    .tk-manage__badge--draft {
-      background: var(--tk-manage-draft);
-    }
+      .tk-manage__badge--draft {
+        background: var(--tk-manage-draft);
+      }
 
-    .tk-manage__badge--published {
-      background: var(--tk-manage-published);
-    }
+      .tk-manage__badge--published {
+        background: var(--tk-manage-published);
+      }
 
-    .tk-manage__badge--archived {
-      background: var(--tk-manage-archived);
-    }
+      .tk-manage__badge--archived {
+        background: var(--tk-manage-archived);
+      }
 
-    .tk-manage__actions {
-      flex-wrap: wrap;
-    }
+      .tk-manage__actions {
+        flex-wrap: wrap;
+      }
 
-    .tk-manage__danger {
-      color: var(--tk-manage-danger);
-    }
+      .tk-manage__danger {
+        color: var(--tk-manage-danger);
+      }
 
-    .tk-manage__detail td {
-      background: #f8fafc;
-    }
+      .tk-manage__detail td {
+        background: #f8fafc;
+      }
 
-    .tk-manage__detail ul {
-      display: grid;
-      gap: .35rem;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
+      .tk-manage__detail ul {
+        display: grid;
+        gap: 0.35rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
 
-    .tk-manage__detail li {
-      display: grid;
-      gap: .5rem;
-      grid-template-columns: 9rem 8rem 8rem minmax(12rem, 1fr);
-    }
-  `],
+      .tk-manage__detail li {
+        display: grid;
+        gap: 0.5rem;
+        grid-template-columns: 9rem 8rem 8rem minmax(12rem, 1fr);
+      }
+    `,
+  ],
 })
 export class TkTourManagerComponent implements OnDestroy {
   private readonly storage = inject(TourStorageAdapter);
@@ -320,8 +334,8 @@ export class TkTourManagerComponent implements OnDestroy {
     const summaries: Record<string, TourAuditSummary> = {};
     for (const [tourId, events] of Object.entries(this.auditEvents())) {
       summaries[tourId] = {
-        started: events.filter(e => e.type === 'started').length,
-        completed: events.filter(e => e.type === 'completed').length,
+        started: events.filter((e) => e.type === 'started').length,
+        completed: events.filter((e) => e.type === 'completed').length,
       };
     }
     return summaries;
@@ -340,10 +354,12 @@ export class TkTourManagerComponent implements OnDestroy {
     const tours = await this.storage.listTours();
     this.tours.set(tours);
     const auditEvents: Record<string, readonly TourAuditEvent[]> = {};
-    // ponytail: upfront audit read is fine for dev-scale localStorage; server adapters can page later.
-    await Promise.all(tours.map(async tour => {
-      auditEvents[tour.id] = this.sortEvents(await this.audit.getEvents(tour.id));
-    }));
+    //  upfront audit read is fine for dev-scale localStorage; server adapters can page later.
+    await Promise.all(
+      tours.map(async (tour) => {
+        auditEvents[tour.id] = this.sortEvents(await this.audit.getEvents(tour.id));
+      }),
+    );
     this.auditEvents.set(auditEvents);
   }
 
@@ -356,7 +372,7 @@ export class TkTourManagerComponent implements OnDestroy {
   }
 
   toggleExpanded(tourId: string): void {
-    this.expandedId.update(id => id === tourId ? null : tourId);
+    this.expandedId.update((id) => (id === tourId ? null : tourId));
   }
 
   run(tour: TourDefinition): void {
@@ -436,7 +452,7 @@ export class TkTourManagerComponent implements OnDestroy {
     }
 
     const tour = value as TourDefinition;
-    const ids = new Set((await this.storage.listTours()).map(t => t.id));
+    const ids = new Set((await this.storage.listTours()).map((t) => t.id));
     const now = new Date().toISOString();
     await this.storage.saveTour({
       ...tour,

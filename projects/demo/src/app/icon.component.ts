@@ -5,7 +5,7 @@ import { inject } from '@angular/core';
 /**
  * Inline SVG icon component using Heroicons 2.x paths (MIT license).
  * Usage: <app-icon name="home" />
- * ponytail: only the icons actually used in this demo are included
+ *  only the icons actually used in this demo are included
  */
 
 const ICONS: Record<string, string> = {
@@ -52,9 +52,18 @@ const ICONS: Record<string, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<span [innerHTML]="svg()" class="icon"></span>`,
   styles: `
-    :host { display: inline-flex; align-items: center; justify-content: center; }
-    .icon { display: flex; }
-    .icon ::ng-deep svg { width: var(--icon-size, 1em); height: var(--icon-size, 1em); }
+    :host {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .icon {
+      display: flex;
+    }
+    .icon ::ng-deep svg {
+      width: var(--icon-size, 1em);
+      height: var(--icon-size, 1em);
+    }
   `,
 })
 export class IconComponent {
@@ -71,7 +80,7 @@ export class IconComponent {
            style="width:${this.size()};height:${this.size()}"
            aria-hidden="true">
         ${path}
-      </svg>`
+      </svg>`,
     );
   }
 }

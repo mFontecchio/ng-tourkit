@@ -25,23 +25,26 @@ export class LocalStorageTourStorageAdapter extends TourStorageAdapter {
   }
 
   async getTour(id: string): Promise<TourDefinition | null> {
-    return (await this.listTours()).find(t => t.id === id) ?? null;
+    return (await this.listTours()).find((t) => t.id === id) ?? null;
   }
 
   async saveTour(tour: TourDefinition): Promise<void> {
     const tours = await this.listTours();
-    const i = tours.findIndex(t => t.id === tour.id);
+    const i = tours.findIndex((t) => t.id === tour.id);
     if (i >= 0) tours[i] = tour;
     else tours.push(tour);
     write(TOURS_KEY, tours);
   }
 
   async deleteTour(id: string): Promise<void> {
-    write(TOURS_KEY, (await this.listTours()).filter(t => t.id !== id));
+    write(
+      TOURS_KEY,
+      (await this.listTours()).filter((t) => t.id !== id),
+    );
   }
 }
 
-/** ponytail: unbounded event list in localStorage — fine for dev, use a server adapter in prod. */
+/**  unbounded event list in localStorage — fine for dev, use a server adapter in prod. */
 export class LocalStorageTourAuditAdapter extends TourAuditAdapter {
   async recordEvent(event: TourAuditEvent): Promise<void> {
     const events = read<TourAuditEvent>(AUDIT_KEY);
@@ -50,12 +53,12 @@ export class LocalStorageTourAuditAdapter extends TourAuditAdapter {
   }
 
   async getEvents(tourId: string): Promise<TourAuditEvent[]> {
-    return read<TourAuditEvent>(AUDIT_KEY).filter(e => e.tourId === tourId);
+    return read<TourAuditEvent>(AUDIT_KEY).filter((e) => e.tourId === tourId);
   }
 
   async hasCompleted(tourId: string, userId: string, minVersion?: number): Promise<boolean> {
     return read<TourAuditEvent>(AUDIT_KEY).some(
-      e =>
+      (e) =>
         e.tourId === tourId &&
         e.userId === userId &&
         e.type === 'completed' &&
