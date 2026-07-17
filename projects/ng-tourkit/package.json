@@ -1,6 +1,7 @@
 {
   "name": "ng-tourkit",
   "version": "0.0.1",
+  "license": "SEE LICENSE IN LICENSE",
   "peerDependencies": {
     "@angular/common": "^20.3.0",
     "@angular/core": "^20.3.0",

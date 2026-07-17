@@ -155,3 +155,12 @@ a recorder button and a manage page.
 - Iframe content is out of scope; shadow DOM is supported via root overrides.
 - Step text is plain text (rendered via interpolation, never HTML) — i18n hook TBD.
 - LocalStorage adapters are dev/demo grade; bring your own backend for production.
+
+## License
+
+Free to use, including in commercial apps. You may not resell or directly monetize
+this library. See [LICENSE](LICENSE) for the full terms. Attribution is required.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Release notes live in [CHANGELOG.md](CHANGELOG.md).

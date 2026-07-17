@@ -85,3 +85,8 @@ npm test                  # vitest (library + demo)
 ```
 
 Tests use Vitest via Angular's experimental `unit-test` builder — not Karma.
+
+## License
+
+Free to use in your apps (including commercial). Do not resell or directly
+monetize this library. Full terms: [LICENSE](../../LICENSE).
