@@ -40,7 +40,12 @@ import { IconComponent } from './icon.component';
 
           <span class="sidebar__section-label">Tours</span>
 
-          <a class="sidebar__item" routerLink="/manage" routerLinkActive="sidebar__item--active">
+          <a
+            class="sidebar__item"
+            routerLink="/manage"
+            routerLinkActive="sidebar__item--active"
+            data-tour="manage-tours-link"
+          >
             <app-icon name="folder" class="sidebar__icon" /> Manage Tours
           </a>
         </nav>
@@ -80,7 +85,12 @@ import { IconComponent } from './icon.component';
 
             <div class="topbar__divider"></div>
 
-            <button class="btn btn--primary btn--sm" (click)="recorder.open()">
+            <button
+              class="btn btn--primary btn--sm"
+              type="button"
+              data-tour="record-button"
+              (click)="recorder.open()"
+            >
               <app-icon name="video" size="1rem" /> Record
             </button>
 

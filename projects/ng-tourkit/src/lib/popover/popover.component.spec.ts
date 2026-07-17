@@ -78,5 +78,18 @@ describe('TkTourPopoverComponent', () => {
     expect(body.textContent).toBe('<img src=x onerror=alert(1)>Hello');
     expect(body.querySelector('img')).toBeNull();
   });
+
+  it('centers the close control content', async () => {
+    const fixture = await render();
+    const close = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button')).find(
+      (button) => button.getAttribute('aria-label') === 'Close tour',
+    );
+
+    expect(close).toBeTruthy();
+    expect(close?.className).toContain('tk-popover-close');
+    expect(getComputedStyle(close!).display).toContain('flex');
+    expect(getComputedStyle(close!).alignItems).toBe('center');
+    expect(getComputedStyle(close!).justifyContent).toBe('center');
+  });
 });
 

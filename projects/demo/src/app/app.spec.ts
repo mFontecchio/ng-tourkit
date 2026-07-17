@@ -18,4 +18,13 @@ describe('App', () => {
     expect(fixture.componentInstance).toBeTruthy();
     expect((fixture.nativeElement as HTMLElement).querySelector('nav')).toBeTruthy();
   });
+
+  it('exposes stable tour anchors on the shell', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const host = fixture.nativeElement as HTMLElement;
+
+    expect(host.querySelector('[data-tour="record-button"]')).toBeTruthy();
+    expect(host.querySelector('[data-tour="manage-tours-link"]')).toBeTruthy();
+  });
 });

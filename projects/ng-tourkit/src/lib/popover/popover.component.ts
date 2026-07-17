@@ -114,6 +114,7 @@ let nextId = 0;
         width: 32px;
         height: 32px;
         min-height: 32px;
+        align-items: flex-start;
         padding: 0;
         border-radius: 999px;
         font-size: 1.5rem;

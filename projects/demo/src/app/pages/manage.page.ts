@@ -9,7 +9,7 @@ import { TkRecorderLauncher } from '@mfontecchio/ng-tourkit/recorder';
   imports: [TkTourManagerComponent],
   template: `
     <div class="page-header">
-      <h1 class="page-title">Manage Tours</h1>
+      <h1 class="page-title" data-tour="manage-title">Manage Tours</h1>
       <p class="page-sub">
         Create, edit, publish and audit guided tours.
         Use the <strong>Record</strong> button to build new tours visually.

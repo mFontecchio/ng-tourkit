@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { TkTourEligibility, TkTourService, TourDefinition } from '@mfontecchio/ng-tourkit';
 import { IconComponent } from '../icon.component';
+import { WORKFLOW_TOUR_ID } from '../workflow-tour';
 
 interface ActivityRow {
   user: string;
@@ -28,6 +29,20 @@ const MOCK_ACTIVITY: ActivityRow[] = [
       <h1 class="page-title" data-tour="home-title">Dashboard</h1>
       <p class="page-sub">Welcome back — here's what's happening with your tours.</p>
     </div>
+
+    @if (workflowTour(); as tour) {
+      <section class="workflow-banner" data-tour="workflow-tour-cta">
+        <div class="workflow-banner__copy">
+          <div class="workflow-banner__title">See the ng-tourkit workflow</div>
+          <p class="workflow-banner__text">
+            Walk through recording, managing, and playing guided tours in this demo.
+          </p>
+        </div>
+        <button class="btn btn--primary" type="button" (click)="run(tour)">
+          <app-icon name="play" size="1rem" /> Take the tour
+        </button>
+      </section>
+    }
 
     <!-- KPI cards -->
     <div class="kpi-grid" data-tour="stats-card">
@@ -75,7 +90,7 @@ const MOCK_ACTIVITY: ActivityRow[] = [
       </div>
 
       <!-- Published tours -->
-      <div class="card" style="overflow:hidden">
+      <div class="card" style="overflow:hidden" data-tour="available-tours">
         <div class="card-header">
           <span class="card-title">Available Tours</span>
           <button class="btn btn--ghost btn--sm" data-tour="refresh-btn" (click)="reload()">
@@ -121,6 +136,35 @@ const MOCK_ACTIVITY: ActivityRow[] = [
     </div>
   `,
   styles: `
+    .workflow-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding: 16px 20px;
+      border: 1px solid #99f6e4;
+      border-radius: 12px;
+      background: var(--c-primary-light);
+    }
+    .workflow-banner__title {
+      font-size: 1rem;
+      font-weight: 650;
+      color: var(--c-slate-900);
+    }
+    .workflow-banner__text {
+      margin: 4px 0 0;
+      font-size: .875rem;
+      color: var(--c-slate-500);
+      line-height: 1.4;
+    }
+    @media (max-width: 700px) {
+      .workflow-banner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -151,6 +195,9 @@ export class HomePage {
   private readonly player = inject(TkTourService);
 
   protected readonly tours = signal<TourDefinition[]>([]);
+  protected readonly workflowTour = computed(
+    () => this.tours().find((tour) => tour.id === WORKFLOW_TOUR_ID) ?? null,
+  );
   protected readonly activity = MOCK_ACTIVITY;
   protected readonly kpis = [
     { icon: 'map',       label: 'Tours Created',  value: '12',  delta: '+2 this mo', deltaClass: 'badge--green'  },
