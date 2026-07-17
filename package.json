@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:demo:pages": "ng build demo --configuration production --base-href /ng-tourkit/",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
