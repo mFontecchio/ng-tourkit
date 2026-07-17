@@ -9,6 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import {
+  TK_THEME_CSS,
   TkTourService,
   TourAuditAdapter,
   TourAuditEvent,
@@ -35,8 +36,8 @@ interface TourAuditSummary {
           <p>Manage saved guided tours.</p>
         </div>
         <div class="tk-manage__tools">
-          <button type="button" (click)="refresh()">Refresh</button>
-          <label class="tk-manage__import">
+          <button type="button" class="tk-btn tk-btn--sm" (click)="refresh()">Refresh</button>
+          <label class="tk-btn tk-btn--sm tk-manage__import">
             Import JSON
             <input type="file" accept="application/json,.json" (change)="importFile($event)" />
           </label>
@@ -90,15 +91,15 @@ interface TourAuditSummary {
                   </td>
                   <td>
                     <div class="tk-manage__actions">
-                      <button type="button" (click)="run(tour)">Run</button>
-                      <button type="button" (click)="edit.emit(tour)">Edit</button>
-                      <button type="button" (click)="toggleStatus(tour)">
+                      <button type="button" class="tk-btn tk-btn--sm" (click)="run(tour)">Run</button>
+                      <button type="button" class="tk-btn tk-btn--sm" (click)="edit.emit(tour)">Edit</button>
+                      <button type="button" class="tk-btn tk-btn--sm" (click)="toggleStatus(tour)">
                         {{ tour.status === 'published' ? 'Unpublish' : 'Publish' }}
                       </button>
-                      <button type="button" (click)="archive(tour)">Archive</button>
-                      <button type="button" (click)="duplicate(tour)">Duplicate</button>
-                      <button type="button" (click)="exportJson(tour)">Export JSON</button>
-                      <button type="button" class="tk-manage__danger" (click)="delete(tour)">
+                      <button type="button" class="tk-btn tk-btn--sm" (click)="archive(tour)">Archive</button>
+                      <button type="button" class="tk-btn tk-btn--sm" (click)="duplicate(tour)">Duplicate</button>
+                      <button type="button" class="tk-btn tk-btn--sm" (click)="exportJson(tour)">Export JSON</button>
+                      <button type="button" class="tk-btn tk-btn--sm tk-btn--danger" (click)="delete(tour)">
                         {{ pendingDeleteId() === tour.id ? 'Confirm delete?' : 'Delete' }}
                       </button>
                     </div>
@@ -136,25 +137,20 @@ interface TourAuditSummary {
     </section>
   `,
   styles: [
+    TK_THEME_CSS,
     `
       :host {
-        --tk-manage-bg: #fff;
-        --tk-manage-border: #d9dee7;
-        --tk-manage-text: #172033;
-        --tk-manage-muted: #667085;
-        --tk-manage-accent: #2454d6;
-        --tk-manage-danger: #b42318;
+        --tk-manage-bg: var(--tk-color-surface);
+        --tk-manage-border: var(--tk-color-border);
+        --tk-manage-text: var(--tk-color-text);
+        --tk-manage-muted: var(--tk-color-text-muted);
+        --tk-manage-accent: var(--tk-color-accent);
+        --tk-manage-danger: var(--tk-color-danger);
         --tk-manage-draft: #667085;
         --tk-manage-published: #067647;
         --tk-manage-archived: #93370d;
         display: block;
         color: var(--tk-manage-text);
-        font-family:
-          system-ui,
-          -apple-system,
-          BlinkMacSystemFont,
-          'Segoe UI',
-          sans-serif;
       }
 
       .tk-manage {
@@ -202,21 +198,9 @@ interface TourAuditSummary {
         color: var(--tk-manage-muted);
       }
 
-      button,
       .tk-manage__import {
-        background: #f8fafc;
-        border: 1px solid var(--tk-manage-border);
-        border-radius: 8px;
-        color: var(--tk-manage-text);
-        cursor: pointer;
-        font: inherit;
-        padding: 0.35rem 0.55rem;
-        white-space: nowrap;
-      }
-
-      button:hover,
-      .tk-manage__import:hover {
-        border-color: var(--tk-manage-accent);
+        position: relative;
+        overflow: hidden;
       }
 
       .tk-manage__import input {
@@ -224,9 +208,9 @@ interface TourAuditSummary {
       }
 
       .tk-manage__error {
-        background: #fef3f2;
-        border: 1px solid #fecdca;
-        border-radius: 8px;
+        background: var(--tk-color-danger-soft);
+        border: 1px solid var(--tk-color-danger-border);
+        border-radius: var(--tk-radius-control);
         color: var(--tk-manage-danger);
         margin-bottom: 0.75rem;
         padding: 0.5rem 0.75rem;
@@ -263,6 +247,8 @@ interface TourAuditSummary {
         background: transparent;
         border: 0;
         color: var(--tk-manage-accent);
+        cursor: pointer;
+        font: inherit;
         padding: 0;
         text-align: left;
       }
@@ -293,12 +279,8 @@ interface TourAuditSummary {
         flex-wrap: wrap;
       }
 
-      .tk-manage__danger {
-        color: var(--tk-manage-danger);
-      }
-
       .tk-manage__detail td {
-        background: #f8fafc;
+        background: var(--tk-color-surface-muted);
       }
 
       .tk-manage__detail ul {

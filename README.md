@@ -16,7 +16,7 @@ and maintain tours by clicking around the real app.
 
 | Import | Ships to | Contents |
 |---|---|---|
-| `ng-tourkit` | end users | player runtime: overlay, popover, `TkTourService`, adapters, audience, auto-launch |
+| `ng-tourkit` | end users | player runtime: overlay, popover, `TkTourService`, adapters, audience, auto-launch, shared UI theme + `TkSelectComponent` |
 | `ng-tourkit/recorder` | authors only (lazy-load / dev builds) | visual recorder panel + capture engine |
 | `ng-tourkit/manage` | admins | tour CRUD table, audit view, import/export |
 
@@ -132,6 +132,37 @@ suggests adding a `data-tour` attribute when targeting would be fragile.
 - Off-screen `aria-live="polite"` announcements per step ("Step 2 of 5: ...").
 - `inert` background for modal steps; `prefers-reduced-motion` disables the
   overlay stage animation and smooth scrolling.
+
+## Theming
+
+All built-in surfaces (player popover, recorder panel, tour manager) share a
+dependency-free control theme. Override look globally via `--tk-*` CSS variables
+on any host element:
+
+```css
+tk-tour-popover,
+tk-tour-recorder-panel,
+tk-tour-manager {
+  --tk-color-accent: #7c3aed;
+  --tk-radius-control: 10px;
+}
+```
+
+Common tokens include `--tk-color-surface`, `--tk-color-text`, `--tk-color-border`,
+`--tk-color-accent`, and `--tk-shadow-focus`. Surface-specific aliases (for example
+`--tk-popover-bg`, `--tk-recorder-bg`, `--tk-manage-accent`) default to the shared
+tokens.
+
+For custom authoring UIs, the core package also exports:
+
+- `TK_THEME_CSS` — a CSS string with defaults and reusable classes (`tk-input`,
+  `tk-textarea`, `tk-btn`, `tk-field`, `tk-label`, `tk-check`).
+- `TkSelectComponent` (`tk-select`) — accessible custom listbox select with fully
+  styled options (no native browser dropdown).
+
+```ts
+import { TK_THEME_CSS, TkSelectComponent } from '@mfontecchio/ng-tourkit';
+```
 
 ## Demo
 

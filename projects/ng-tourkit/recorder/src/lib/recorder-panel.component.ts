@@ -8,7 +8,10 @@ import {
   TourStatus,
   TourStep,
   TourStorageAdapter,
+  TkSelectComponent,
+  TkSelectOption,
   TkTourService,
+  TK_THEME_CSS,
   scoreQuality,
   validateTourDefinition,
 } from '@mfontecchio/ng-tourkit';
@@ -30,10 +33,12 @@ interface StepForm {
 }
 
 const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
+const sideSelectOptions: readonly TkSelectOption[] = sides.map(side => ({ value: side, label: side }));
 
 @Component({
   selector: 'tk-tour-recorder-panel',
   standalone: true,
+  imports: [TkSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-tk-recorder': '',
@@ -103,46 +108,47 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
                   <span class="q-badge q-modal">modal</span>
                 }
               </div>
-              <div class="field">
-                <label class="field-lbl" for="tk-step-title">Title</label>
-                <input id="tk-step-title" class="field-input" [value]="f.title" (input)="patchForm({ title: text($event) })" placeholder="Step title" />
+              <div class="tk-field">
+                <label class="tk-label" for="tk-step-title">Title</label>
+                <input id="tk-step-title" class="tk-input" [value]="f.title" (input)="patchForm({ title: text($event) })" placeholder="Step title" />
               </div>
-              <div class="field">
-                <label class="field-lbl" for="tk-step-body">Body</label>
-                <textarea id="tk-step-body" class="field-input field-ta" [value]="f.body" (input)="patchForm({ body: text($event) })" placeholder="Step description"></textarea>
+              <div class="tk-field">
+                <label class="tk-label" for="tk-step-body">Body</label>
+                <textarea id="tk-step-body" class="tk-textarea" [value]="f.body" (input)="patchForm({ body: text($event) })" placeholder="Step description"></textarea>
               </div>
               @if (f.target) {
                 @if (f.index !== null) {
                   <div class="target-field">
                     <div>
-                      <span class="field-lbl">Target</span>
+                      <span class="tk-label">Target</span>
                       <div class="target-selector" [title]="f.target.candidates[0]?.selector ?? 'Element target'">
                         {{ f.target.candidates[0]?.selector ?? 'Element target' }}
                       </div>
                     </div>
-                    <button type="button" class="btn btn-sm" (click)="changeTarget()" [disabled]="isPicking()">Change target</button>
+                    <button type="button" class="tk-btn tk-btn--sm" (click)="changeTarget()" [disabled]="isPicking()">Change target</button>
                   </div>
                 }
-                <div class="field">
-                  <label class="field-lbl" for="tk-step-side">Popover side</label>
-                  <select id="tk-step-side" class="field-select" [value]="f.side" (change)="patchForm({ side: side($event) })">
-                    @for (side of sideOptions; track side) {
-                      <option [value]="side">{{ side }}</option>
-                    }
-                  </select>
+                <div class="tk-field">
+                  <label class="tk-label" for="tk-step-side">Popover side</label>
+                  <tk-select
+                    id="tk-step-side"
+                    [value]="f.side"
+                    [options]="sideSelectOptions"
+                    (valueChange)="patchForm({ side: asSide($event) })"
+                  />
                 </div>
-                <label class="check-field">
-                  <input type="checkbox" class="check-input" [checked]="f.clickAction" (change)="patchForm({ clickAction: checked($event) })" />
+                <label class="tk-check">
+                  <input type="checkbox" class="tk-check__input" [checked]="f.clickAction" (change)="patchForm({ clickAction: checked($event) })" />
                   <span>Click element on Next</span>
                 </label>
-                <div class="field">
-                  <label class="field-lbl" for="tk-step-wait">Wait timeout (ms)</label>
-                  <input id="tk-step-wait" type="number" min="0" class="field-input" [value]="f.waitTimeout ?? ''" (input)="patchForm({ waitTimeout: numberOrNull($event) })" placeholder="None" />
+                <div class="tk-field">
+                  <label class="tk-label" for="tk-step-wait">Wait timeout (ms)</label>
+                  <input id="tk-step-wait" type="number" min="0" class="tk-input" [value]="f.waitTimeout ?? ''" (input)="patchForm({ waitTimeout: numberOrNull($event) })" placeholder="None" />
                 </div>
               }
               <div class="form-actions">
-                <button type="submit" class="btn btn-primary btn-sm" [disabled]="isPicking()">Save step</button>
-                <button type="button" class="btn btn-ghost btn-sm" (click)="isPicking() ? cancelTargetPick() : cancelForm()">
+                <button type="submit" class="tk-btn tk-btn--primary tk-btn--sm" [disabled]="isPicking()">Save step</button>
+                <button type="button" class="tk-btn tk-btn--ghost tk-btn--sm" (click)="isPicking() ? cancelTargetPick() : cancelForm()">
                   {{ isPicking() ? 'Cancel pick' : 'Cancel' }}
                 </button>
               </div>
@@ -153,18 +159,19 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
           <div class="panel-body">
             <!-- Tour info -->
             <section class="section">
-              <div class="field">
-                <label class="field-lbl" for="tk-tour-name">Tour name</label>
-                <input id="tk-tour-name" class="field-input" [value]="name()" (input)="setName($event)" placeholder="my-tour" />
+              <div class="tk-field">
+                <label class="tk-label" for="tk-tour-name">Tour name</label>
+                <input id="tk-tour-name" class="tk-input" [value]="name()" (input)="setName($event)" placeholder="my-tour" />
               </div>
-              <div class="field">
-                <label class="field-lbl" for="tk-tour-load">Load existing</label>
-                <select id="tk-tour-load" class="field-select" [value]="selectedTourId()" (change)="loadSelected($event)">
-                  <option value="">Select a tour…</option>
-                  @for (tour of tours(); track tour.id) {
-                    <option [value]="tour.id">{{ tour.name }} v{{ tour.version }} ({{ tour.status }})</option>
-                  }
-                </select>
+              <div class="tk-field">
+                <label class="tk-label" for="tk-tour-load">Load existing</label>
+                <tk-select
+                  id="tk-tour-load"
+                  [value]="selectedTourId()"
+                  [options]="tourSelectOptions()"
+                  placeholder="Select a tour…"
+                  (valueChange)="loadSelected($event)"
+                />
               </div>
             </section>
 
@@ -176,8 +183,8 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
                   <span class="count-chip">{{ steps().length }}</span>
                 </span>
                 <div class="row">
-                  <button type="button" class="btn btn-sm" (click)="addStep()" [disabled]="capture.mode() === 'pick'">+ Element</button>
-                  <button type="button" class="btn btn-sm" (click)="addModalStep()">+ Modal</button>
+                  <button type="button" class="tk-btn tk-btn--sm" (click)="addStep()" [disabled]="capture.mode() === 'pick'">+ Element</button>
+                  <button type="button" class="tk-btn tk-btn--sm" (click)="addModalStep()">+ Modal</button>
                 </div>
               </div>
               @if (steps().length === 0) {
@@ -205,11 +212,11 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
 
           <!-- Footer -->
           <footer class="panel-footer">
-            <button type="button" class="btn btn-ghost btn-sm" (click)="newTour()">New tour</button>
+            <button type="button" class="tk-btn tk-btn--ghost tk-btn--sm" (click)="newTour()">New tour</button>
             <div class="footer-actions">
-              <button type="button" class="btn btn-ghost btn-sm" (click)="preview()">Preview</button>
-              <button type="button" class="btn btn-sm" (click)="saveDraft()">Save draft</button>
-              <button type="button" class="btn btn-primary btn-sm" (click)="publish()">Publish</button>
+              <button type="button" class="tk-btn tk-btn--ghost tk-btn--sm" (click)="preview()">Preview</button>
+              <button type="button" class="tk-btn tk-btn--sm" (click)="saveDraft()">Save draft</button>
+              <button type="button" class="tk-btn tk-btn--primary tk-btn--sm" (click)="publish()">Publish</button>
             </div>
           </footer>
         </div>
@@ -217,16 +224,16 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
     </div>
   `,
   styles: [
+    TK_THEME_CSS,
     `
       :host {
         position: fixed;
         right: 16px;
         bottom: 16px;
         z-index: 10003;
-        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
         font-size: 13px;
         line-height: 1.45;
-        color: var(--tk-recorder-text, #111827);
+        color: var(--tk-recorder-text, var(--tk-color-text));
       }
 
       /* ── Panel shell ─────────────────────────────────────── */
@@ -236,7 +243,7 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
         display: flex;
         flex-direction: column;
         border-radius: 14px;
-        background: var(--tk-recorder-bg, #fff);
+        background: var(--tk-recorder-bg, var(--tk-color-surface));
         box-shadow: 0 4px 6px -1px rgba(0,0,0,0.10), 0 16px 40px -4px rgba(0,0,0,0.18);
         border: 1px solid rgba(0,0,0,0.08);
         overflow: hidden;
@@ -474,48 +481,6 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
         vertical-align: middle;
       }
 
-      /* ── Fields ──────────────────────────────────────────── */
-      .field { display: grid; gap: 4px; margin-bottom: 8px; }
-      .field:last-child { margin-bottom: 0; }
-      .field-lbl { font-size: 11px; font-weight: 600; color: #374151; }
-      .field-input,
-      .field-select {
-        font: inherit;
-        font-size: 13px;
-        width: 100%;
-        box-sizing: border-box;
-        padding: 6px 10px;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        background: #f9fafb;
-        color: #111827;
-        outline: none;
-        transition: border-color 0.14s, box-shadow 0.14s, background 0.14s;
-      }
-      .field-input:focus,
-      .field-select:focus {
-        border-color: #3b82f6;
-        background: #fff;
-        box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
-      }
-      .field-ta { min-height: 64px; resize: vertical; padding-top: 8px; }
-      .check-field {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 8px;
-        cursor: pointer;
-        font-size: 12px;
-        color: #374151;
-      }
-      .check-input {
-        width: 15px;
-        height: 15px;
-        accent-color: #2563eb;
-        flex-shrink: 0;
-        cursor: pointer;
-      }
-
       /* ── Steps list ──────────────────────────────────────── */
       .empty-steps {
         margin: 0 0 4px;
@@ -583,34 +548,6 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
       .q-fragile { background: #fee2e2; color: #b91c1c; }
       .q-modal { background: #dbeafe; color: #1d4ed8; }
 
-      /* ── Buttons ─────────────────────────────────────────── */
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        font: inherit;
-        font-size: 13px;
-        font-weight: 500;
-        padding: 6px 12px;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        background: #fff;
-        color: #374151;
-        cursor: pointer;
-        transition: background 0.12s, border-color 0.12s, box-shadow 0.12s;
-        white-space: nowrap;
-      }
-      .btn:hover { background: #f9fafb; border-color: #9ca3af; }
-      .btn:active { background: #f3f4f6; }
-      .btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
-      .btn-primary { background: #2563eb; border-color: #2563eb; color: #fff; }
-      .btn-primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
-      .btn-primary:active { background: #1e40af; }
-      .btn-ghost { background: transparent; border-color: transparent; color: #6b7280; }
-      .btn-ghost:hover { background: #f3f4f6; border-color: transparent; color: #374151; }
-      .btn-sm { font-size: 12px; padding: 4px 10px; border-radius: 6px; }
-
       /* ── Icon buttons ────────────────────────────────────── */
       .icon-btn {
         display: inline-flex;
@@ -660,7 +597,7 @@ export class TkTourRecorderPanelComponent {
   readonly closing = signal(false);
   readonly isDirty = signal(false);
   readonly capture = this.captureService;
-  readonly sideOptions = sides;
+  readonly sideSelectOptions = sideSelectOptions;
   readonly id = signal(this.nextId());
   readonly name = signal(`tour-${this.id().slice(5)}`);
   readonly version = signal(1);
@@ -675,6 +612,12 @@ export class TkTourRecorderPanelComponent {
   readonly wasPublished = signal(false);
   readonly draft = computed(() => this.buildTour(this.status(), this.version()));
   readonly isPicking = computed(() => this.pickIntent() !== null);
+  readonly tourSelectOptions = computed<readonly TkSelectOption[]>(() =>
+    this.tours().map(tour => ({
+      value: tour.id,
+      label: `${tour.name} v${tour.version} (${tour.status})`,
+    })),
+  );
 
   private readonly pickIntent = signal<PickIntent | null>(null);
 
@@ -835,8 +778,7 @@ export class TkTourRecorderPanelComponent {
     this.isDirty.set(false);
   }
 
-  loadSelected(event: Event): void {
-    const id = this.text(event);
+  loadSelected(id: string): void {
     this.selectedTourId.set(id);
     if (id) void this.loadTour(id);
   }
@@ -866,15 +808,14 @@ export class TkTourRecorderPanelComponent {
   }
 
   text(event: Event): string {
-    return (event.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement).value;
+    return (event.target as HTMLInputElement | HTMLTextAreaElement).value;
   }
 
   checked(event: Event): boolean {
     return (event.target as HTMLInputElement).checked;
   }
 
-  side(event: Event): StepSide {
-    const value = this.text(event);
+  asSide(value: string): StepSide {
     return sides.includes(value as StepSide) ? (value as StepSide) : 'bottom';
   }
 

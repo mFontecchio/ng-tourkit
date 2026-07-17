@@ -1,6 +1,6 @@
 {
   "name": "@mfontecchio/ng-tourkit",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Guided tours for Angular 20.3+ with a built-in visual recorder",
   "author": "mFontecchio",
   "license": "SEE LICENSE IN LICENSE",

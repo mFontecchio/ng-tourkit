@@ -7,11 +7,26 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-07-17
+
+### Added
+
+- Shared UI theme (`TK_THEME_CSS`) with reusable control classes (`tk-input`, `tk-btn`, etc.)
+  and themable `--tk-*` CSS variables.
+- `TkSelectComponent` — dependency-free custom listbox select with keyboard navigation and
+  ARIA support; exported from `ng-tourkit`.
+- Unified control styling across the player popover, recorder panel, and tour manager.
+
+### Changed
+
+- Recorder selects (popover side, load tour) now use `tk-select` instead of native
+  `<select>` elements for consistent option-list styling.
+
+## [0.0.1] - 2026-07-16
+
 ### Changed
 
 - Published package name is now `@mfontecchio/ng-tourkit` (npmjs.org org scope).
-
-## [0.0.1] - 2026-07-16
 
 ### Added
 

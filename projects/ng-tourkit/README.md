@@ -18,7 +18,7 @@ npm install @mfontecchio/ng-tourkit
 
 | Import | Use for |
 |---|---|
-| `ng-tourkit` | Tour player, storage/audit adapters, audience, auto-launch |
+| `ng-tourkit` | Tour player, storage/audit adapters, audience, auto-launch, shared UI theme + `TkSelectComponent` |
 | `ng-tourkit/recorder` | Visual recorder (lazy-load in production) |
 | `ng-tourkit/manage` | Admin tour table, audit view, import/export |
 
@@ -69,6 +69,16 @@ export class ManagePage {
 
 For production, implement `TourStorageAdapter` and `TourAuditAdapter` against
 your API and pass them to `provideTourKit({ storage, audit })`.
+
+## Theming
+
+Built-in UI surfaces share themable `--tk-*` CSS variables. Override accent color,
+border radius, and other tokens on `tk-tour-popover`, `tk-tour-recorder-panel`, or
+`tk-tour-manager`. The core package also exports `TK_THEME_CSS` and `TkSelectComponent`
+for custom surfaces that should match the kit look.
+
+See the [repository README — Theming](https://github.com/mFontecchio/ng-tourkit#theming)
+for token names and examples.
 
 ## Full documentation
 

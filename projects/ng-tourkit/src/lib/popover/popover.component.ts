@@ -16,6 +16,7 @@ import {
 import { trapFocus } from '../a11y/focus-trap';
 import { PopoverAlign, PopoverSide } from '../models/tour.models';
 import { StageRect } from '../overlay/stage-path';
+import { TK_THEME_CSS } from '../ui/theme';
 import { PopoverPosition, computePopoverPosition } from './positioning';
 
 let nextId = 0;
@@ -34,7 +35,7 @@ let nextId = 0;
   },
   template: `
     <button
-      class="tk-popover-close"
+      class="tk-btn tk-btn--ghost tk-popover-close"
       type="button"
       [attr.aria-label]="closeLabel()"
       (click)="closed.emit()"
@@ -50,11 +51,11 @@ let nextId = 0;
 
     <div class="tk-popover-actions">
       @if (showPrev()) {
-        <button type="button" (click)="prev.emit()">{{ prevLabel() }}</button>
+        <button type="button" class="tk-btn" (click)="prev.emit()">{{ prevLabel() }}</button>
       }
 
       @if (showNext()) {
-        <button type="button" (click)="next.emit()">
+        <button type="button" class="tk-btn tk-btn--primary" (click)="next.emit()">
           {{ isLastStep() ? doneLabel() : nextLabel() }}
         </button>
       }
@@ -73,16 +74,15 @@ let nextId = 0;
     }
   `,
   styles: [
+    TK_THEME_CSS,
     `
       :host {
-        --tk-popover-bg: #fff;
-        --tk-popover-color: #111827;
-        --tk-popover-border: #e5e7eb;
+        --tk-popover-bg: var(--tk-color-surface);
+        --tk-popover-color: var(--tk-color-text);
+        --tk-popover-border: var(--tk-color-border);
         --tk-popover-shadow: 0 20px 50px rgb(0 0 0 / 24%);
         --tk-popover-radius: 12px;
-        --tk-popover-button-bg: #111827;
-        --tk-popover-button-color: #fff;
-        --tk-popover-muted: #6b7280;
+        --tk-popover-muted: var(--tk-color-text-muted);
         position: fixed;
         z-index: 10001;
         box-sizing: border-box;
@@ -107,20 +107,15 @@ let nextId = 0;
         line-height: 1.5;
       }
 
-      button {
-        cursor: pointer;
-      }
-
       .tk-popover-close {
         position: absolute;
         top: 10px;
         right: 10px;
         width: 32px;
         height: 32px;
-        border: 0;
+        min-height: 32px;
+        padding: 0;
         border-radius: 999px;
-        background: transparent;
-        color: inherit;
         font-size: 1.5rem;
         line-height: 1;
       }
@@ -129,19 +124,6 @@ let nextId = 0;
         display: flex;
         justify-content: flex-end;
         gap: 8px;
-      }
-
-      .tk-popover-actions button {
-        border: 1px solid var(--tk-popover-border);
-        border-radius: 8px;
-        padding: 8px 14px;
-        background: var(--tk-popover-button-bg);
-        color: var(--tk-popover-button-color);
-      }
-
-      .tk-popover-actions button:first-child:not(:last-child) {
-        background: var(--tk-popover-bg);
-        color: var(--tk-popover-color);
       }
 
       .tk-popover-progress {
