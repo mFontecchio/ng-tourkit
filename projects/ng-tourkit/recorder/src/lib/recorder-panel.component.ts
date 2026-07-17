@@ -15,6 +15,7 @@ import {
 import { LocatorQuality, PickedElement, TkCaptureService } from './capture.service';
 
 type StepSide = Exclude<PopoverSide, 'over'>;
+type PickIntent = 'new-step' | 'retarget';
 
 interface StepForm {
   readonly index: number | null;
@@ -34,7 +35,11 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
   selector: 'tk-tour-recorder-panel',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { 'data-tk-recorder': '', '[attr.aria-label]': '"Tour recorder"' },
+  host: {
+    'data-tk-recorder': '',
+    '[attr.aria-label]': '"Tour recorder"',
+    '(document:keydown)': 'onDocumentKeydown($event)',
+  },
   template: `
     <div class="panel" [class.panel--collapsed]="collapsed()" [class.panel--closing]="closing()">
       <!-- Header -->
@@ -107,6 +112,17 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
                 <textarea id="tk-step-body" class="field-input field-ta" [value]="f.body" (input)="patchForm({ body: text($event) })" placeholder="Step description"></textarea>
               </div>
               @if (f.target) {
+                @if (f.index !== null) {
+                  <div class="target-field">
+                    <div>
+                      <span class="field-lbl">Target</span>
+                      <div class="target-selector" [title]="f.target.candidates[0]?.selector ?? 'Element target'">
+                        {{ f.target.candidates[0]?.selector ?? 'Element target' }}
+                      </div>
+                    </div>
+                    <button type="button" class="btn btn-sm" (click)="changeTarget()" [disabled]="isPicking()">Change target</button>
+                  </div>
+                }
                 <div class="field">
                   <label class="field-lbl" for="tk-step-side">Popover side</label>
                   <select id="tk-step-side" class="field-select" [value]="f.side" (change)="patchForm({ side: side($event) })">
@@ -125,8 +141,10 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
                 </div>
               }
               <div class="form-actions">
-                <button type="submit" class="btn btn-primary btn-sm">Save step</button>
-                <button type="button" class="btn btn-ghost btn-sm" (click)="cancelForm()">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm" [disabled]="isPicking()">Save step</button>
+                <button type="button" class="btn btn-ghost btn-sm" (click)="isPicking() ? cancelTargetPick() : cancelForm()">
+                  {{ isPicking() ? 'Cancel pick' : 'Cancel' }}
+                </button>
               </div>
             </form>
           }
@@ -264,7 +282,7 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
         align-items: center;
         gap: 8px;
         padding: 11px 14px;
-        background: linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 100%);
+        background: #1d4ed8;
         color: #fff;
         flex-shrink: 0;
         user-select: none;
@@ -392,6 +410,21 @@ const sides: readonly StepSide[] = ['top', 'right', 'bottom', 'left'];
       }
       .form-title { font-size: 13px; font-weight: 600; color: #111827; }
       .form-actions { display: flex; gap: 8px; margin-top: 12px; }
+      .target-field {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+      .target-selector {
+        max-width: 220px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: #6b7280;
+        font-size: 12px;
+      }
 
       /* ── Scrollable body ─────────────────────────────────── */
       .panel-body {
@@ -641,14 +674,16 @@ export class TkTourRecorderPanelComponent {
   readonly loadedVersion = signal<number | null>(null);
   readonly wasPublished = signal(false);
   readonly draft = computed(() => this.buildTour(this.status(), this.version()));
+  readonly isPicking = computed(() => this.pickIntent() !== null);
 
-  private waitingForPick = false;
+  private readonly pickIntent = signal<PickIntent | null>(null);
 
   constructor() {
     void this.reloadTours();
     effect(() => {
       const picked = this.captureService.lastPicked();
-      if (this.waitingForPick && picked) this.openPickedForm(picked);
+      const intent = this.pickIntent();
+      if (intent && picked) this.applyPickedElement(picked, intent);
     });
     effect(() => {
       this.steps(); // track
@@ -665,21 +700,18 @@ export class TkTourRecorderPanelComponent {
   }
 
   addStep(): void {
-    this.waitingForPick = true;
     this.form.set(null);
-    this.captureService.clearPicked();
-    this.captureService.mode.set('pick');
-    this.captureService.start();
+    this.startPicking('new-step');
   }
 
   addModalStep(): void {
-    this.waitingForPick = false;
-    this.captureService.stop();
+    this.cancelTargetPick();
     this.form.set(this.blankForm(null, null));
   }
 
   saveStep(event?: Event): void {
     event?.preventDefault();
+    if (this.isPicking()) return;
     const form = this.form();
     if (!form) return;
     const step: TourStep = {
@@ -701,13 +733,13 @@ export class TkTourRecorderPanelComponent {
 
   cancelForm(): void {
     this.form.set(null);
-    this.waitingForPick = false;
-    this.captureService.stop();
+    this.cancelTargetPick();
   }
 
   editStep(index: number): void {
     const step = this.steps()[index];
     if (!step) return;
+    this.cancelTargetPick();
     this.form.set({
       index,
       target: step.target ?? null,
@@ -719,6 +751,26 @@ export class TkTourRecorderPanelComponent {
       waitTimeout: step.waitFor?.timeoutMs ?? null,
       route: step.route,
     });
+  }
+
+  changeTarget(): void {
+    const form = this.form();
+    if (!form?.target || form.index === null) return;
+    this.startPicking('retarget');
+  }
+
+  cancelTargetPick(): void {
+    if (!this.isPicking()) return;
+    this.pickIntent.set(null);
+    this.captureService.stop();
+    this.captureService.clearPicked();
+  }
+
+  onDocumentKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Escape' || !this.isPicking()) return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.cancelTargetPick();
   }
 
   deleteStep(index: number): void {
@@ -835,10 +887,22 @@ export class TkTourRecorderPanelComponent {
     return step.target ? scoreQuality(step.target) : 'modal';
   }
 
-  private openPickedForm(picked: PickedElement): void {
-    this.waitingForPick = false;
+  private startPicking(intent: PickIntent): void {
+    this.pickIntent.set(intent);
+    this.captureService.clearPicked();
+    this.captureService.mode.set('pick');
+    this.captureService.start();
+  }
+
+  private applyPickedElement(picked: PickedElement, intent: PickIntent): void {
+    this.pickIntent.set(null);
     this.captureService.stop();
-    this.form.set(this.blankForm(picked.locator, picked.quality, this.router?.url));
+    this.captureService.clearPicked();
+    if (intent === 'new-step') {
+      this.form.set(this.blankForm(picked.locator, picked.quality, this.router?.url));
+      return;
+    }
+    this.patchForm({ target: picked.locator, quality: picked.quality, route: this.router?.url });
   }
 
   private blankForm(target: ElementLocator | null, quality: LocatorQuality | null, route?: string): StepForm {

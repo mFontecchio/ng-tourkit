@@ -14,7 +14,7 @@ import { IconComponent } from './icon.component';
       <!-- Sidebar -->
       <aside class="sidebar">
         <div class="sidebar__brand">
-          <app-icon name="beaker" size="1.5rem" class="sidebar__logo" />
+          <img src="logo.svg" alt="" width="24" height="24" class="sidebar__logo" />
           <span class="sidebar__name">ng-tourkit</span>
         </div>
 
@@ -46,7 +46,7 @@ import { IconComponent } from './icon.component';
         </nav>
 
         <div class="sidebar__footer">
-          <app-icon name="beaker" size=".875rem" class="sidebar__logo" />
+          <img src="logo.svg" alt="" width="14" height="14" class="sidebar__logo" />
           <span class="sidebar__footer-text">Demo environment</span>
         </div>
       </aside>
