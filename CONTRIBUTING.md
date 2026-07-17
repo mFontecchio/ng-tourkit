@@ -27,6 +27,10 @@ npx ng build ng-tourkit   # publishable build
 - Note any breaking changes or migration steps.
 - Link related issues when applicable.
 
+## Security reports
+
+Do not file public issues for vulnerabilities. Follow [SECURITY.md](SECURITY.md).
+
 ## Questions and scope
 
 If you are unsure whether a feature fits the library’s “no third-party runtime

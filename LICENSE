@@ -1,6 +1,16 @@
 ng-tourkit Source-Available License
 Copyright (c) 2026 mFontecchio
 
+This is a source-available license. It is not an OSI-approved open-source
+license. GitHub and package registries may label it as "Other" / custom.
+
+Summary (the numbered terms below control if anything conflicts):
+  - Free to use, copy, modify, and distribute, including inside commercial apps
+  - Attribution required (keep copyright + license notices)
+  - You may NOT sell, resell, or directly monetize ng-tourkit itself
+  - Embedding it in a product you sell is allowed; selling this library is not
+  - Provided AS IS, with no warranty
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to use,
 copy, modify, merge, publish, and distribute the Software, including in

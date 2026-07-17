@@ -158,8 +158,14 @@ a recorder button and a manage page.
 
 ## License
 
-Free to use, including in commercial apps. You may not resell or directly monetize
-this library. See [LICENSE](LICENSE) for the full terms. Attribution is required.
+Source-available (custom; not OSI open source). You may use it free of charge,
+including in commercial apps, with attribution. You may not resell or directly
+monetize this library. Full terms: [LICENSE](LICENSE).
+
+## Security
+
+Report vulnerabilities privately — see [SECURITY.md](SECURITY.md). Do not open
+public issues for security problems.
 
 ## Contributing
 

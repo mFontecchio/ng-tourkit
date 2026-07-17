@@ -88,5 +88,6 @@ Tests use Vitest via Angular's experimental `unit-test` builder — not Karma.
 
 ## License
 
-Free to use in your apps (including commercial). Do not resell or directly
-monetize this library. Full terms: [LICENSE](../../LICENSE).
+Source-available custom license (not OSI open source). Free to use in your apps,
+including commercial ones, with attribution. Do not resell or directly monetize
+this library. Full terms: [LICENSE](../../LICENSE).
