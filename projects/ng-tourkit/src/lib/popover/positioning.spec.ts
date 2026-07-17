@@ -163,5 +163,21 @@ describe('computePopoverPosition', () => {
     expect(result.top).toBeGreaterThanOrEqual(50);
     expect(result.left).toBeGreaterThanOrEqual(30);
   });
+
+  it('keeps modal popovers inside a phone-sized viewport', () => {
+    const result = computePopoverPosition({
+      targetRect: null,
+      popoverSize: { width: 360, height: 220 },
+      viewport: { width: 390, height: 844 },
+      side: 'bottom',
+      align: 'center',
+      padding: 10,
+    });
+
+    expect(result.left).toBeGreaterThanOrEqual(10);
+    expect(result.left + 360).toBeLessThanOrEqual(380);
+    expect(result.top).toBeGreaterThanOrEqual(10);
+    expect(result.top + 220).toBeLessThanOrEqual(834);
+  });
 });
 

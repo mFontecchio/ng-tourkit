@@ -17,7 +17,7 @@ import { trapFocus } from '../a11y/focus-trap';
 import { PopoverAlign, PopoverSide } from '../models/tour.models';
 import { StageRect } from '../overlay/stage-path';
 import { TK_THEME_CSS } from '../ui/theme';
-import { getViewportRect } from '../viewport/visual-viewport';
+import { getViewportRect, listenToViewportChanges } from '../viewport/visual-viewport';
 import { PopoverPosition, computePopoverPosition } from './positioning';
 
 let nextId = 0;
@@ -88,6 +88,7 @@ let nextId = 0;
         z-index: 10001;
         box-sizing: border-box;
         width: min(360px, calc(100vw - 20px));
+        max-width: calc(100vw - 20px);
         max-height: min(70dvh, calc(100dvh - 20px));
         overflow-y: auto;
         overscroll-behavior: contain;
@@ -130,6 +131,7 @@ let nextId = 0;
       .tk-popover-actions {
         display: flex;
         justify-content: flex-end;
+        flex-wrap: wrap;
         gap: 8px;
       }
 
@@ -215,6 +217,10 @@ export class TkTourPopoverComponent implements AfterViewInit, OnDestroy, OnInit 
 
   private readonly element = inject(ElementRef<HTMLElement>);
   private readonly popoverSize = signal({ width: 320, height: 180 });
+  private readonly viewport = signal(getViewportRect());
+  private readonly stopViewportListen = listenToViewportChanges(() => {
+    this.viewport.set(getViewportRect());
+  });
   private focusCleanup: (() => void) | null = null;
   private readonly keydown = (event: KeyboardEvent): void => {
     if (event.key === 'Escape') {
@@ -228,11 +234,10 @@ export class TkTourPopoverComponent implements AfterViewInit, OnDestroy, OnInit 
 
   readonly isLastStep = computed(() => this.stepIndex() + 1 >= this.stepCount());
   readonly position = computed<PopoverPosition>(() => {
-    const viewport = getViewportRect();
     return computePopoverPosition({
       targetRect: this.targetRect(),
       popoverSize: this.popoverSize(),
-      viewport,
+      viewport: this.viewport(),
       side: this.side(),
       align: this.align(),
     });
@@ -259,6 +264,7 @@ export class TkTourPopoverComponent implements AfterViewInit, OnDestroy, OnInit 
 
   ngOnDestroy(): void {
     document.removeEventListener('keydown', this.keydown);
+    this.stopViewportListen();
     this.focusCleanup?.();
     this.measure.destroy();
   }
