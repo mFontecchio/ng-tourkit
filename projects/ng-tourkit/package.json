@@ -1,7 +1,29 @@
 {
-  "name": "ng-tourkit",
+  "name": "@mfontecchio/ng-tourkit",
   "version": "0.0.1",
+  "description": "Guided tours for Angular 20.3+ with a built-in visual recorder",
+  "author": "mFontecchio",
   "license": "SEE LICENSE IN LICENSE",
+  "keywords": [
+    "angular",
+    "tour",
+    "onboarding",
+    "walkthrough",
+    "guided-tour",
+    "recorder"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mFontecchio/ng-tourkit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mFontecchio/ng-tourkit/issues"
+  },
+  "homepage": "https://github.com/mFontecchio/ng-tourkit#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "peerDependencies": {
     "@angular/common": "^20.3.0",
     "@angular/core": "^20.3.0",

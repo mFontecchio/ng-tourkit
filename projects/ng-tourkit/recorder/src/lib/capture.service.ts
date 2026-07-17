@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, Signal, inject, signal } from '@angular/core';
-import { ElementLocator, generateLocator, scoreQuality } from 'ng-tourkit';
+import { ElementLocator, generateLocator, scoreQuality } from '@mfontecchio/ng-tourkit';
 
 export type RecorderMode = 'pick' | 'passthrough';
 export type LocatorQuality = 'stable' | 'ok' | 'fragile';

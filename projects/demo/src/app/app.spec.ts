@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideTourKit } from 'ng-tourkit';
+import { provideTourKit } from '@mfontecchio/ng-tourkit';
 import { App } from './app';
 
 describe('App', () => {

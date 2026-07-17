@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { TkTourAutoLauncher } from 'ng-tourkit';
-import { TkRecorderLauncher } from 'ng-tourkit/recorder';
+import { TkTourAutoLauncher } from '@mfontecchio/ng-tourkit';
+import { TkRecorderLauncher } from '@mfontecchio/ng-tourkit/recorder';
 import { DemoUser } from './demo-user.service';
 import { IconComponent } from './icon.component';
 

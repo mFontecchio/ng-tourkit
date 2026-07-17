@@ -1,7 +1,7 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { provideTourKit, TourDefinition, TourStep, TourStorageAdapter } from 'ng-tourkit';
+import { provideTourKit, TourDefinition, TourStep, TourStorageAdapter } from '@mfontecchio/ng-tourkit';
 import { TkCaptureService } from './capture.service';
 import { TkTourRecorderPanelComponent } from './recorder-panel.component';
 

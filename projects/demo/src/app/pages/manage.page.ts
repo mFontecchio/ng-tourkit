@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { TourDefinition } from 'ng-tourkit';
-import { TkTourManagerComponent } from 'ng-tourkit/manage';
-import { TkRecorderLauncher } from 'ng-tourkit/recorder';
+import { TourDefinition } from '@mfontecchio/ng-tourkit';
+import { TkTourManagerComponent } from '@mfontecchio/ng-tourkit/manage';
+import { TkRecorderLauncher } from '@mfontecchio/ng-tourkit/recorder';
 
 @Component({
   selector: 'app-manage',

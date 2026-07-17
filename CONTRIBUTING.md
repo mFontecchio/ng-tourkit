@@ -27,6 +27,19 @@ npx ng build ng-tourkit   # publishable build
 - Note any breaking changes or migration steps.
 - Link related issues when applicable.
 
+## Publishing
+
+Releases publish `@mfontecchio/ng-tourkit` to npmjs.org via `.github/workflows/publish.yml`
+(GitHub Release or workflow_dispatch).
+
+Before the first automated publish:
+
+1. Create the package on npm under the `mfontecchio` org (or publish once manually).
+2. Configure [trusted publishing](https://docs.npmjs.com/trusted-publishers/) for
+   GitHub user `mFontecchio`, repo `ng-tourkit`, workflow `publish.yml`,
+   environment `npm`.
+3. Create a GitHub Environment named `npm` (optional protection rules recommended).
+
 ## Security reports
 
 Do not file public issues for vulnerabilities. Follow [SECURITY.md](SECURITY.md).

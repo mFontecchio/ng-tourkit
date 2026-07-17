@@ -23,7 +23,7 @@ and maintain tours by clicking around the real app.
 ## Quick start
 
 ```sh
-npm install ng-tourkit
+npm install @mfontecchio/ng-tourkit
 ```
 
 ```ts
@@ -35,7 +35,7 @@ import {
   roleAudienceResolver,
   TOUR_AUDIENCE_RESOLVER,
   TOUR_USER_ID,
-} from 'ng-tourkit';
+} from '@mfontecchio/ng-tourkit';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -62,7 +62,7 @@ export const appConfig: ApplicationConfig = {
 ```ts
 // run a tour
 import { inject } from '@angular/core';
-import { TkTourAutoLauncher, TkTourService } from 'ng-tourkit';
+import { TkTourAutoLauncher, TkTourService } from '@mfontecchio/ng-tourkit';
 
 inject(TkTourService).start(tour);
 
@@ -73,8 +73,8 @@ inject(TkTourAutoLauncher).checkAndLaunch();
 ```ts
 // recorder + manage (import only where needed; lazy-load in production)
 import { Component, inject } from '@angular/core';
-import { TkTourManagerComponent } from 'ng-tourkit/manage';
-import { TkRecorderLauncher } from 'ng-tourkit/recorder';
+import { TkTourManagerComponent } from '@mfontecchio/ng-tourkit/manage';
+import { TkRecorderLauncher } from '@mfontecchio/ng-tourkit/recorder';
 
 @Component({
   imports: [TkTourManagerComponent],

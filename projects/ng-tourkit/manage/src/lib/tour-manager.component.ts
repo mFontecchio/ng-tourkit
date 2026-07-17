@@ -16,7 +16,7 @@ import {
   TourStatus,
   TourStorageAdapter,
   validateTourDefinition,
-} from 'ng-tourkit';
+} from '@mfontecchio/ng-tourkit';
 
 interface TourAuditSummary {
   readonly started: number;

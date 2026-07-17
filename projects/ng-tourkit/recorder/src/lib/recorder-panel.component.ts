@@ -11,7 +11,7 @@ import {
   TkTourService,
   scoreQuality,
   validateTourDefinition,
-} from 'ng-tourkit';
+} from '@mfontecchio/ng-tourkit';
 import { LocatorQuality, PickedElement, TkCaptureService } from './capture.service';
 
 type StepSide = Exclude<PopoverSide, 'over'>;

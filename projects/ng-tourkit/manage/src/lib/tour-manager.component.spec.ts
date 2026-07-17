@@ -8,7 +8,7 @@ import {
   TourDefinition,
   TourStorageAdapter,
   provideTourKit,
-} from 'ng-tourkit';
+} from '@mfontecchio/ng-tourkit';
 import { TkTourManagerComponent } from './tour-manager.component';
 
 function tour(id: string, name: string, status: TourDefinition['status'] = 'draft'): TourDefinition {

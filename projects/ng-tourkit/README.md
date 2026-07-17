@@ -9,7 +9,7 @@ trail, and a tour manager UI.
 ## Install
 
 ```sh
-npm install ng-tourkit
+npm install @mfontecchio/ng-tourkit
 ```
 
 **Requirements:** Angular `^20.3.0`, standalone components.
@@ -34,7 +34,7 @@ import {
   TOUR_USER_ID,
   TkTourAutoLauncher,
   TkTourService,
-} from 'ng-tourkit';
+} from '@mfontecchio/ng-tourkit';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -55,8 +55,8 @@ inject(TkTourService).start(tour);
 
 ```ts
 import { Component, inject } from '@angular/core';
-import { TkTourManagerComponent } from 'ng-tourkit/manage';
-import { TkRecorderLauncher } from 'ng-tourkit/recorder';
+import { TkTourManagerComponent } from '@mfontecchio/ng-tourkit/manage';
+import { TkRecorderLauncher } from '@mfontecchio/ng-tourkit/recorder';
 
 @Component({
   imports: [TkTourManagerComponent],

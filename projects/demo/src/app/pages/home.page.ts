@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { TkTourEligibility, TkTourService, TourDefinition } from 'ng-tourkit';
+import { TkTourEligibility, TkTourService, TourDefinition } from '@mfontecchio/ng-tourkit';
 import { IconComponent } from '../icon.component';
 
 interface ActivityRow {

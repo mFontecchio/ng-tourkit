@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { generateLocator, scoreQuality } from 'ng-tourkit';
+import { generateLocator, scoreQuality } from '@mfontecchio/ng-tourkit';
 import { LocatorQuality, TkCaptureService } from './capture.service';
 
 @Component({

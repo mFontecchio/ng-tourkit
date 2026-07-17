@@ -8,13 +8,13 @@
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "paths": {
-      "ng-tourkit": [
+      "@mfontecchio/ng-tourkit": [
         "./projects/ng-tourkit/src/public-api.ts"
       ],
-      "ng-tourkit/recorder": [
+      "@mfontecchio/ng-tourkit/recorder": [
         "./projects/ng-tourkit/recorder/src/public-api.ts"
       ],
-      "ng-tourkit/manage": [
+      "@mfontecchio/ng-tourkit/manage": [
         "./projects/ng-tourkit/manage/src/public-api.ts"
       ]
     },

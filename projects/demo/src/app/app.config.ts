@@ -1,6 +1,6 @@
 import { ApplicationConfig, inject, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { TOUR_AUDIENCE_RESOLVER, TOUR_USER_ID, provideTourKit, roleAudienceResolver } from 'ng-tourkit';
+import { TOUR_AUDIENCE_RESOLVER, TOUR_USER_ID, provideTourKit, roleAudienceResolver } from '@mfontecchio/ng-tourkit';
 
 import { routes } from './app.routes';
 import { DemoUser } from './demo-user.service';
