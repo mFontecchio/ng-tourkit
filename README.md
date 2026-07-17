@@ -1,9 +1,16 @@
 # ng-tourkit
 
-Zero-dependency guided tours for Angular 20+ - with a built-in visual recorder so
-PMs, BAs and other non-developers create and maintain tours by clicking around the
-real app. No driver.js, no floating-ui, no rxjs: peer deps are @angular/core,
-@angular/common and @angular/router only.
+Guided tours for Angular 20.3+, with no third-party runtime dependencies — only
+Angular peers (`@angular/core`, `@angular/common`, `@angular/router`) plus `tslib`.
+No driver.js, no floating-ui, no RxJS in the library itself.
+
+Includes a built-in visual recorder so PMs, BAs and other non-developers create
+and maintain tours by clicking around the real app.
+
+## Requirements
+
+- Angular `^20.3.0`
+- Standalone components (the library does not ship NgModules)
 
 ## Entry points
 
@@ -15,41 +22,80 @@ real app. No driver.js, no floating-ui, no rxjs: peer deps are @angular/core,
 
 ## Quick start
 
+```sh
+npm install ng-tourkit
+```
+
 ```ts
 // app.config.ts
-import { provideTourKit, roleAudienceResolver, TOUR_AUDIENCE_RESOLVER, TOUR_USER_ID } from 'ng-tourkit';
+import { ApplicationConfig, inject } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import {
+  provideTourKit,
+  roleAudienceResolver,
+  TOUR_AUDIENCE_RESOLVER,
+  TOUR_USER_ID,
+} from 'ng-tourkit';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZonelessChangeDetection(),
     provideRouter(routes),
-    provideTourKit(), // localStorage adapters by default - swap for your backend
-    { provide: TOUR_USER_ID, useFactory: () => { const auth = inject(Auth); return () => auth.userId(); } },
-    { provide: TOUR_AUDIENCE_RESOLVER, useFactory: () => { const auth = inject(Auth); return roleAudienceResolver(() => auth.roles()); } },
+    provideTourKit(), // localStorage adapters by default — swap for your backend
+    {
+      provide: TOUR_USER_ID,
+      useFactory: () => {
+        const auth = inject(Auth);
+        return () => auth.userId();
+      },
+    },
+    {
+      provide: TOUR_AUDIENCE_RESOLVER,
+      useFactory: () => {
+        const auth = inject(Auth);
+        return roleAudienceResolver(() => auth.roles());
+      },
+    },
   ],
 };
 ```
 
 ```ts
 // run a tour
+import { inject } from '@angular/core';
+import { TkTourAutoLauncher, TkTourService } from 'ng-tourkit';
+
 inject(TkTourService).start(tour);
 
-// auto-launch pending tours after navigation
+// auto-launch pending tours after navigation (e.g. on NavigationEnd)
 inject(TkTourAutoLauncher).checkAndLaunch();
-
-// open the recorder (gate this behind your own role check)
-inject(TkRecorderLauncher).open();        // from 'ng-tourkit/recorder'
-inject(TkRecorderLauncher).open(tourId);  // edit an existing tour
 ```
 
-```html
-<!-- admin page -->
-<tk-tour-manager (edit)="recorder.open($event.id)" />
+```ts
+// recorder + manage (import only where needed; lazy-load in production)
+import { Component, inject } from '@angular/core';
+import { TkTourManagerComponent } from 'ng-tourkit/manage';
+import { TkRecorderLauncher } from 'ng-tourkit/recorder';
+
+@Component({
+  imports: [TkTourManagerComponent],
+  template: `<tk-tour-manager (edit)="editTour($event)" />`,
+})
+export class ManagePage {
+  private readonly recorder = inject(TkRecorderLauncher);
+
+  editTour(tour: { id: string }): void {
+    this.recorder.open(tour.id);
+  }
+}
+
+// gate recorder.open() behind your own role check
+inject(TkRecorderLauncher).open();        // create a new tour
+inject(TkRecorderLauncher).open(tourId);  // edit an existing tour
 ```
 
 ## Production persistence
 
-Implement the two abstract adapters against your API and pass them to provideTourKit:
+Implement the two abstract adapters against your API and pass them to `provideTourKit`:
 
 ```ts
 class HttpTourStorage extends TourStorageAdapter { /* listTours/getTour/saveTour/deleteTour */ }
@@ -58,41 +104,45 @@ class HttpTourAudit extends TourAuditAdapter { /* recordEvent/getEvents/hasCompl
 provideTourKit({ storage: HttpTourStorage, audit: HttpTourAudit })
 ```
 
-Audit events (started, step_viewed, completed, dismissed) carry
-tourId, tourVersion, userId, stepId, timestamps - enough to answer
-"has this user completed training X at version >= N?" via hasCompleted.
+Audit events (`started`, `step_viewed`, `completed`, `dismissed`) carry
+`tourId`, `tourVersion`, `userId`, `stepId`, timestamps — enough to answer
+"has this user completed training X at version >= N?" via `hasCompleted`.
 
 ## How element targeting stays robust
 
-Each recorded step stores an ElementLocator:
+Each recorded step stores an `ElementLocator`:
 
-- **Multi-candidate selectors**, most stable first: data-tour/data-testid ->
-  human #id (GUID-like ids are rejected) -> aria-label/role -> word-like
-  attributes -> text content -> penalty-scored CSS path -> structural nth-of-type
+- **Multi-candidate selectors**, most stable first: `data-tour`/`data-testid` ->
+  human `#id` (GUID-like ids are rejected) -> `aria-label`/`role` -> word-like
+  attributes -> text content -> penalty-scored CSS path -> structural `nth-of-type`
   fallback. Every CSS candidate is verified *unique* at record time.
 - **A DOM fingerprint** (tag, text, stable attributes, depth, sibling index,
   ancestry). If every selector breaks after a redeploy, the resolver
   fuzzy-matches the fingerprint (>= 0.75 similarity) and heals the step.
-- **Async waits**: if the target is not there yet, a MutationObserver retries
-  until timeout, and Element.checkVisibility() filters hidden matches.
+- **Async waits**: if the target is not there yet, a `MutationObserver` retries
+  until timeout, and `Element.checkVisibility()` filters hidden matches.
 
 The recorder shows a live quality badge (stable / ok / fragile) while hovering and
-suggests adding a data-tour attribute when targeting would be fragile.
+suggests adding a `data-tour` attribute when targeting would be fragile.
 
 ## Accessibility
 
-- APG modal-dialog pattern: role="dialog", aria-modal, focus trap with wrap,
+- APG modal-dialog pattern: `role="dialog"`, `aria-modal`, focus trap with wrap,
   focus restore, Escape to dismiss.
-- Off-screen aria-live="polite" announcements per step ("Step 2 of 5: ...").
-- inert background for modal steps; prefers-reduced-motion disables the
+- Off-screen `aria-live="polite"` announcements per step ("Step 2 of 5: ...").
+- `inert` background for modal steps; `prefers-reduced-motion` disables the
   overlay stage animation and smooth scrolling.
 
 ## Demo
 
+From the repository root:
+
 ```sh
-npm start                # serves projects/demo
-npm test                 # ng test ng-tourkit (vitest, all entry points)
-npx ng build ng-tourkit  # publishable package in dist/ng-tourkit
+npm install
+npm start                      # serves projects/demo
+npm test                       # vitest: ng-tourkit library + demo app
+npx ng build ng-tourkit        # publishable package in dist/ng-tourkit
+npm run build:demo:pages         # GitHub Pages build (base-href /ng-tourkit/)
 ```
 
 The demo has multi-route pages, a mock user/role switcher (audience targeting),
@@ -100,8 +150,8 @@ a recorder button and a manage page.
 
 ## Known limitations (v1)
 
-- Replayed input actions dispatch synthetic input/change events - fine for
+- Replayed input actions dispatch synthetic `input`/`change` events — fine for
   Angular forms, not for listeners requiring trusted events.
 - Iframe content is out of scope; shadow DOM is supported via root overrides.
-- Step text is plain text (rendered via interpolation, never HTML) - i18n hook TBD.
+- Step text is plain text (rendered via interpolation, never HTML) — i18n hook TBD.
 - LocalStorage adapters are dev/demo grade; bring your own backend for production.

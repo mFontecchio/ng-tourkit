@@ -1,63 +1,87 @@
-# NgTourkit
+# ng-tourkit
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.0.
+Guided tours for Angular 20.3+, with no third-party runtime dependencies — only
+Angular peers (`@angular/core`, `@angular/common`, `@angular/router`) plus `tslib`.
 
-## Code scaffolding
+Includes a visual recorder, resilient element targeting, audience rules, audit
+trail, and a tour manager UI.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Install
 
-```bash
-ng generate component component-name
+```sh
+npm install ng-tourkit
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+**Requirements:** Angular `^20.3.0`, standalone components.
 
-```bash
-ng generate --help
+## Entry points
+
+| Import | Use for |
+|---|---|
+| `ng-tourkit` | Tour player, storage/audit adapters, audience, auto-launch |
+| `ng-tourkit/recorder` | Visual recorder (lazy-load in production) |
+| `ng-tourkit/manage` | Admin tour table, audit view, import/export |
+
+## Quick start
+
+```ts
+import { ApplicationConfig, inject } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import {
+  provideTourKit,
+  roleAudienceResolver,
+  TOUR_AUDIENCE_RESOLVER,
+  TOUR_USER_ID,
+  TkTourAutoLauncher,
+  TkTourService,
+} from 'ng-tourkit';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideRouter(routes),
+    provideTourKit(),
+    { provide: TOUR_USER_ID, useFactory: () => () => inject(Auth).userId() },
+    {
+      provide: TOUR_AUDIENCE_RESOLVER,
+      useFactory: () => roleAudienceResolver(() => inject(Auth).roles()),
+    },
+  ],
+};
+
+// after navigation settles
+inject(TkTourAutoLauncher).checkAndLaunch();
+inject(TkTourService).start(tour);
 ```
 
-## Building
+```ts
+import { Component, inject } from '@angular/core';
+import { TkTourManagerComponent } from 'ng-tourkit/manage';
+import { TkRecorderLauncher } from 'ng-tourkit/recorder';
 
-To build the library, run:
-
-```bash
-ng build ng-tourkit
+@Component({
+  imports: [TkTourManagerComponent],
+  template: `<tk-tour-manager (edit)="recorder.open($event.id)" />`,
+})
+export class ManagePage {
+  readonly recorder = inject(TkRecorderLauncher);
+}
 ```
 
-This command will compile your project, and the build artifacts will be placed in the `dist/` directory.
+For production, implement `TourStorageAdapter` and `TourAuditAdapter` against
+your API and pass them to `provideTourKit({ storage, audit })`.
 
-### Publishing the Library
+## Full documentation
 
-Once the project is built, you can publish your library by following these steps:
+See the [repository README](https://github.com/mFontecchio/ng-tourkit#readme) for
+targeting details, accessibility notes, demo setup, and known limitations.
 
-1. Navigate to the `dist` directory:
-   ```bash
-   cd dist/ng-tourkit
-   ```
+## Development
 
-2. Run the `npm publish` command to publish your library to the npm registry:
-   ```bash
-   npm publish
-   ```
+From the monorepo root:
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
+```sh
+npx ng build ng-tourkit   # output: dist/ng-tourkit
+npm test                  # vitest (library + demo)
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Tests use Vitest via Angular's experimental `unit-test` builder — not Karma.
