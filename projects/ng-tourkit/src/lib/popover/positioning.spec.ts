@@ -136,5 +136,32 @@ describe('computePopoverPosition', () => {
 
     expect(result.arrow).toEqual({ side: 'left', offset: 12 });
   });
+
+  it('clamps tall popovers to the top padding when they exceed the viewport', () => {
+    const result = computePopoverPosition({
+      targetRect: { x: 100, y: 100, width: 40, height: 20 },
+      popoverSize: { width: 120, height: 500 },
+      viewport: { width: 320, height: 400 },
+      side: 'bottom',
+      align: 'center',
+      padding: 10,
+    });
+
+    expect(result.top).toBe(10);
+  });
+
+  it('includes visual viewport offsets when clamping', () => {
+    const result = computePopoverPosition({
+      targetRect: null,
+      popoverSize: { width: 100, height: 50 },
+      viewport: { width: 300, height: 400, offsetLeft: 20, offsetTop: 40 },
+      side: 'over',
+      align: 'center',
+      padding: 10,
+    });
+
+    expect(result.top).toBeGreaterThanOrEqual(50);
+    expect(result.left).toBeGreaterThanOrEqual(30);
+  });
 });
 

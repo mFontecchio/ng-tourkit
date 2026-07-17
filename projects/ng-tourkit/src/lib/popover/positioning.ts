@@ -10,7 +10,12 @@ export interface DOMRectLike {
 export interface PopoverPositionInput {
   readonly targetRect: DOMRectLike | null;
   readonly popoverSize: { readonly width: number; readonly height: number };
-  readonly viewport: { readonly width: number; readonly height: number };
+  readonly viewport: {
+    readonly width: number;
+    readonly height: number;
+    readonly offsetLeft?: number;
+    readonly offsetTop?: number;
+  };
   readonly side: PopoverSide;
   readonly align: PopoverAlign;
   readonly gap?: number;
@@ -34,11 +39,17 @@ export function computePopoverPosition(input: PopoverPositionInput): PopoverPosi
   const padding = input.padding ?? 10;
   const width = input.popoverSize.width;
   const height = input.popoverSize.height;
+  const offsetLeft = input.viewport.offsetLeft ?? 0;
+  const offsetTop = input.viewport.offsetTop ?? 0;
+  const minTop = offsetTop + padding;
+  const minLeft = offsetLeft + padding;
+  const maxTop = offsetTop + input.viewport.height - height - padding;
+  const maxLeft = offsetLeft + input.viewport.width - width - padding;
 
   if (!input.targetRect || input.side === 'over') {
     return {
-      top: clamp((input.viewport.height - height) / 2, padding, input.viewport.height - height - padding),
-      left: clamp((input.viewport.width - width) / 2, padding, input.viewport.width - width - padding),
+      top: clamp(offsetTop + (input.viewport.height - height) / 2, minTop, maxTop),
+      left: clamp(offsetLeft + (input.viewport.width - width) / 2, minLeft, maxLeft),
       actualSide: 'over',
       arrow: null,
     };
@@ -47,8 +58,8 @@ export function computePopoverPosition(input: PopoverPositionInput): PopoverPosi
   const target = input.targetRect;
   const side = chooseSide(input.side, target, input.popoverSize, input.viewport, gap);
   const raw = rawPosition(side, input.align, target, width, height, gap);
-  const top = clamp(raw.top, padding, input.viewport.height - height - padding);
-  const left = clamp(raw.left, padding, input.viewport.width - width - padding);
+  const top = clamp(raw.top, minTop, maxTop);
+  const left = clamp(raw.left, minLeft, maxLeft);
 
   return {
     top,

@@ -27,4 +27,25 @@ describe('App', () => {
     expect(host.querySelector('[data-tour="record-button"]')).toBeTruthy();
     expect(host.querySelector('[data-tour="manage-tours-link"]')).toBeTruthy();
   });
+
+  it('toggles the mobile navigation drawer', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const host = fixture.nativeElement as HTMLElement;
+    const shell = host.querySelector('.shell') as HTMLElement;
+    const menu = host.querySelector('[aria-label="Open navigation"]') as HTMLButtonElement;
+    const backdrop = host.querySelector('[aria-label="Close navigation"]') as HTMLButtonElement;
+
+    expect(menu).toBeTruthy();
+    expect(backdrop).toBeTruthy();
+    expect(shell.classList.contains('shell--nav-open')).toBe(false);
+
+    menu.click();
+    fixture.detectChanges();
+    expect(shell.classList.contains('shell--nav-open')).toBe(true);
+
+    backdrop.click();
+    fixture.detectChanges();
+    expect(shell.classList.contains('shell--nav-open')).toBe(false);
+  });
 });

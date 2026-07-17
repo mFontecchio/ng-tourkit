@@ -172,4 +172,42 @@ describe('TkTourManagerComponent', () => {
     expect(tours).toHaveLength(2);
     expect(tours.map(t => t.id).filter(id => id === 'tour-a')).toHaveLength(1);
   });
+
+  it('renders a mobile card list with tour details and actions', async () => {
+    await storage.saveTour(tour('tour-a', 'Alpha tour', 'published'));
+    const fixture = TestBed.createComponent(TkTourManagerComponent);
+    fixture.detectChanges();
+    await stable(fixture);
+
+    const host = fixture.nativeElement as HTMLElement;
+    const cards = host.querySelector('.tk-manage__cards');
+    const card = host.querySelector('.tk-manage__card');
+
+    expect(cards).toBeTruthy();
+    expect(card).toBeTruthy();
+    expect(card?.textContent).toContain('Alpha tour');
+    expect(card?.textContent).toContain('published');
+    expect(card?.textContent).toContain('Version 2');
+    expect(card?.textContent).toContain('2 steps');
+    expect(card?.textContent).toContain('0 started / 0 completed');
+
+    const labels = Array.from(card!.querySelectorAll('button')).map((b) => (b.textContent ?? '').trim());
+    expect(labels).toEqual(
+      expect.arrayContaining([
+        'Alpha tour',
+        'Run',
+        'Edit',
+        'Unpublish',
+        'Archive',
+        'Duplicate',
+        'Export JSON',
+        'Delete',
+      ]),
+    );
+
+    clickButton(fixture, 'Alpha tour');
+    await stable(fixture);
+    expect(host.querySelector('.tk-manage__detail--card')).toBeTruthy();
+    expect(text(fixture)).toContain('Audit events');
+  });
 });

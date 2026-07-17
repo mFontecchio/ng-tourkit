@@ -17,6 +17,7 @@ import { trapFocus } from '../a11y/focus-trap';
 import { PopoverAlign, PopoverSide } from '../models/tour.models';
 import { StageRect } from '../overlay/stage-path';
 import { TK_THEME_CSS } from '../ui/theme';
+import { getViewportRect } from '../viewport/visual-viewport';
 import { PopoverPosition, computePopoverPosition } from './positioning';
 
 let nextId = 0;
@@ -87,6 +88,9 @@ let nextId = 0;
         z-index: 10001;
         box-sizing: border-box;
         width: min(360px, calc(100vw - 20px));
+        max-height: min(70dvh, calc(100dvh - 20px));
+        overflow-y: auto;
+        overscroll-behavior: contain;
         padding: 20px;
         border: 1px solid var(--tk-popover-border);
         border-radius: var(--tk-popover-radius);
@@ -111,10 +115,12 @@ let nextId = 0;
         position: absolute;
         top: 10px;
         right: 10px;
+        display: inline-flex;
+        align-items: flex-start;
+        justify-content: center;
         width: 32px;
         height: 32px;
         min-height: 32px;
-        align-items: flex-start;
         padding: 0;
         border-radius: 999px;
         font-size: 1.5rem;
@@ -221,18 +227,16 @@ export class TkTourPopoverComponent implements AfterViewInit, OnDestroy, OnInit 
   };
 
   readonly isLastStep = computed(() => this.stepIndex() + 1 >= this.stepCount());
-  readonly position = computed<PopoverPosition>(() =>
-    computePopoverPosition({
+  readonly position = computed<PopoverPosition>(() => {
+    const viewport = getViewportRect();
+    return computePopoverPosition({
       targetRect: this.targetRect(),
       popoverSize: this.popoverSize(),
-      viewport: {
-        width: globalThis.innerWidth || document.documentElement.clientWidth,
-        height: globalThis.innerHeight || document.documentElement.clientHeight,
-      },
+      viewport,
       side: this.side(),
       align: this.align(),
-    }),
-  );
+    });
+  });
 
   private readonly measure = afterRenderEffect(() => {
     const rect = this.element.nativeElement.getBoundingClientRect();

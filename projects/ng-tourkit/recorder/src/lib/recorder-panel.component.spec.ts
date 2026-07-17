@@ -170,6 +170,18 @@ describe('TkTourRecorderPanelComponent', () => {
 
     expect((await storage.getTour('tour-save'))?.status).toBe('draft');
   });
+
+  it('includes mobile-friendly panel sizing styles', () => {
+    const styles = (
+      TkTourRecorderPanelComponent as unknown as { ɵcmp: { styles: readonly string[] } }
+    ).ɵcmp.styles.join('\n');
+
+    expect(styles).toContain('calc(100vw - 32px)');
+    expect(styles).toContain('safe-area-inset-right');
+    expect(styles).toContain('safe-area-inset-bottom');
+    expect(styles).toContain('max-width: 768px');
+    expect(styles).toContain('flex-wrap: wrap');
+  });
 });
 
 function validStep(patch: Partial<TourStep> = {}): TourStep {

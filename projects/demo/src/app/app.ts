@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TkTourAutoLauncher } from '@mfontecchio/ng-tourkit';
 import { TkRecorderLauncher } from '@mfontecchio/ng-tourkit/recorder';
@@ -10,9 +10,9 @@ import { IconComponent } from './icon.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet, RouterLink, RouterLinkActive, IconComponent],
   template: `
-    <div class="shell">
+    <div class="shell" [class.shell--nav-open]="navOpen()">
       <!-- Sidebar -->
-      <aside class="sidebar">
+      <aside class="sidebar" id="demo-sidebar">
         <div class="sidebar__brand">
           <img src="logo.svg" alt="" width="24" height="24" class="sidebar__logo" />
           <span class="sidebar__name">ng-tourkit</span>
@@ -26,15 +26,26 @@ import { IconComponent } from './icon.component';
             routerLink="/"
             routerLinkActive="sidebar__item--active"
             [routerLinkActiveOptions]="{ exact: true }"
+            (click)="closeNav()"
           >
             <app-icon name="home" class="sidebar__icon" /> Dashboard
           </a>
 
-          <a class="sidebar__item" routerLink="/settings" routerLinkActive="sidebar__item--active">
+          <a
+            class="sidebar__item"
+            routerLink="/settings"
+            routerLinkActive="sidebar__item--active"
+            (click)="closeNav()"
+          >
             <app-icon name="cog" class="sidebar__icon" /> Settings
           </a>
 
-          <a class="sidebar__item" routerLink="/admin" routerLinkActive="sidebar__item--active">
+          <a
+            class="sidebar__item"
+            routerLink="/admin"
+            routerLinkActive="sidebar__item--active"
+            (click)="closeNav()"
+          >
             <app-icon name="shield" class="sidebar__icon" /> Admin
           </a>
 
@@ -45,6 +56,7 @@ import { IconComponent } from './icon.component';
             routerLink="/manage"
             routerLinkActive="sidebar__item--active"
             data-tour="manage-tours-link"
+            (click)="closeNav()"
           >
             <app-icon name="folder" class="sidebar__icon" /> Manage Tours
           </a>
@@ -56,12 +68,28 @@ import { IconComponent } from './icon.component';
         </div>
       </aside>
 
+      <button
+        type="button"
+        class="nav-backdrop"
+        aria-label="Close navigation"
+        (click)="closeNav()"
+      ></button>
+
       <!-- Main area -->
       <div class="main-area">
         <!-- Top bar -->
         <header class="topbar">
           <div class="topbar__left">
-            <!--  breadcrumb TBD; title injected by each page -->
+            <button
+              type="button"
+              class="btn btn--ghost btn--sm topbar__menu"
+              aria-label="Open navigation"
+              [attr.aria-expanded]="navOpen()"
+              aria-controls="demo-sidebar"
+              (click)="toggleNav()"
+            >
+              <app-icon name="bars" size="1.25rem" />
+            </button>
           </div>
 
           <div class="topbar__right">
@@ -86,12 +114,13 @@ import { IconComponent } from './icon.component';
             <div class="topbar__divider"></div>
 
             <button
-              class="btn btn--primary btn--sm"
+              class="btn btn--primary btn--sm topbar__record"
               type="button"
               data-tour="record-button"
               (click)="recorder.open()"
             >
-              <app-icon name="video" size="1rem" /> Record
+              <app-icon name="video" size="1rem" />
+              <span class="topbar__record-label">Record</span>
             </button>
 
             <div class="topbar__user">
@@ -114,13 +143,25 @@ import { IconComponent } from './icon.component';
 export class App {
   protected readonly user = inject(DemoUser);
   protected readonly recorder = inject(TkRecorderLauncher);
+  protected readonly navOpen = signal(false);
   private readonly autoLauncher = inject(TkTourAutoLauncher);
   private readonly router = inject(Router);
 
   constructor() {
     this.router.events.subscribe((e) => {
-      if (e instanceof NavigationEnd) void this.autoLauncher.checkAndLaunch();
+      if (e instanceof NavigationEnd) {
+        this.closeNav();
+        void this.autoLauncher.checkAndLaunch();
+      }
     });
+  }
+
+  protected toggleNav(): void {
+    this.navOpen.update((open) => !open);
+  }
+
+  protected closeNav(): void {
+    this.navOpen.set(false);
   }
 
   protected switchUser(e: Event): void {

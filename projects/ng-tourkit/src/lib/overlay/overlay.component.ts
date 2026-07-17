@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 
 import { prefersReducedMotion } from '../a11y/reduced-motion';
+import { getViewportRect, listenToViewportChanges } from '../viewport/visual-viewport';
 import { easeOutQuad } from './stage-tracker';
 import { StageRect, stageSvgPath } from './stage-path';
 
@@ -59,18 +60,12 @@ export class TkTourOverlayComponent implements OnDestroy {
   readonly animationDurationMs = input(300);
   readonly overlayClick = output<void>();
 
-  private readonly viewport = signal({
-    width: globalThis.innerWidth || 0,
-    height: globalThis.innerHeight || 0,
-  });
+  private readonly viewport = signal(getViewportRect());
   private readonly renderedStage = signal<StageRect | null>(null);
   private animationFrame: number | null = null;
-  private readonly updateViewport = (): void => {
-    this.viewport.set({
-      width: globalThis.innerWidth || 0,
-      height: globalThis.innerHeight || 0,
-    });
-  };
+  private readonly stopViewportListen = listenToViewportChanges(() => {
+    this.viewport.set(getViewportRect());
+  });
 
   readonly path = computed(() => {
     const viewport = this.viewport();
@@ -88,12 +83,11 @@ export class TkTourOverlayComponent implements OnDestroy {
   });
 
   constructor() {
-    globalThis.addEventListener?.('resize', this.updateViewport, { passive: true });
-    this.updateViewport();
+    this.viewport.set(getViewportRect());
   }
 
   ngOnDestroy(): void {
-    globalThis.removeEventListener?.('resize', this.updateViewport);
+    this.stopViewportListen();
     this.cancelAnimation();
     this.stageEffect.destroy();
   }
@@ -143,4 +137,3 @@ export class TkTourOverlayComponent implements OnDestroy {
     }
   }
 }
-

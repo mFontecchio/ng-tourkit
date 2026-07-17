@@ -133,6 +133,18 @@ suggests adding a `data-tour` attribute when targeting would be fragile.
 - `inert` background for modal steps; `prefers-reduced-motion` disables the
   overlay stage animation and smooth scrolling.
 
+## Responsive / mobile
+
+All built-in surfaces are responsive down to phone widths (single `768px`
+breakpoint):
+
+- The player popover, recorder panel, and tour manager reflow for small screens
+  and honor `env(safe-area-inset-*)` (notches, home indicators).
+- Overlay stage and popover positioning track the `VisualViewport`, so steps stay
+  aligned and fully on-screen during pinch-zoom, on-screen keyboard, or collapsing
+  mobile browser chrome. When `VisualViewport` is unavailable, positioning falls
+  back to the layout viewport.
+
 ## Theming
 
 All built-in surfaces (player popover, recorder panel, tour manager) share a
@@ -177,7 +189,9 @@ npm run build:demo:pages         # GitHub Pages build (base-href /ng-tourkit/)
 ```
 
 The demo has multi-route pages, a mock user/role switcher (audience targeting),
-a recorder button and a manage page.
+a recorder button, and a manage page. It ships a bundled "ng-tourkit workflow"
+tour (record → manage → play) that auto-launches on first visit, and its shell is
+fully responsive with an off-canvas drawer nav on mobile.
 
 ## Known limitations (v1)
 

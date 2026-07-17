@@ -7,6 +7,23 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Added
+
+- Responsive/mobile support across built-in surfaces. The player popover, recorder
+  panel, and tour manager now adapt to small screens (single `768px` breakpoint),
+  respect `env(safe-area-inset-*)`, and constrain themselves to the viewport.
+- Visual viewport tracking: overlay stage and popover positioning follow the
+  `VisualViewport` (pinch-zoom, on-screen keyboard, mobile browser chrome) and fall
+  back to the layout viewport when unavailable.
+
+### Changed
+
+- Popover positioning now clamps within the visual viewport (including its offset),
+  so popovers stay fully on-screen when the visual and layout viewports differ.
+- Recorder panel uses a fluid width (`min(width, 100vw - padding)`) with a scrollable
+  max-height instead of a fixed width.
+- Tour manager switches from a table to a stacked card layout below `768px`.
+
 ## [0.1.0] - 2026-07-17
 
 ### Added
