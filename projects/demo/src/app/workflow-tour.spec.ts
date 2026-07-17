@@ -28,7 +28,7 @@ describe('WORKFLOW_TOUR', () => {
 
   it('demonstrates a tour across dashboard, manage, and settings routes', () => {
     expect(new Set(WORKFLOW_TOUR.steps.map(step => step.route).filter(Boolean))).toEqual(
-      new Set(['/', '/manage', '/settings']),
+      new Set(['/playground', '/playground/manage', '/playground/settings']),
     );
   });
 });

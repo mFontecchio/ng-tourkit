@@ -67,6 +67,7 @@ const MOCK_ACTIVITY: ActivityRow[] = [
           <span class="card-title">Recent Activity</span>
           <span class="badge badge--slate">Last 24 h</span>
         </div>
+        <div class="table-scroll">
         <table class="data-table">
           <thead>
             <tr>
@@ -87,6 +88,7 @@ const MOCK_ACTIVITY: ActivityRow[] = [
             }
           </tbody>
         </table>
+        </div>
       </div>
 
       <!-- Published tours -->
@@ -107,6 +109,7 @@ const MOCK_ACTIVITY: ActivityRow[] = [
             </div>
           </div>
         } @else {
+          <div class="table-scroll">
           <table class="data-table">
             <thead>
               <tr>
@@ -131,6 +134,7 @@ const MOCK_ACTIVITY: ActivityRow[] = [
               }
             </tbody>
           </table>
+          </div>
         }
       </div>
     </div>
@@ -158,28 +162,44 @@ const MOCK_ACTIVITY: ActivityRow[] = [
       color: var(--c-slate-500);
       line-height: 1.4;
     }
-    @media (max-width: 700px) {
+    @media (max-width: 768px) {
       .workflow-banner {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
       }
+      .workflow-banner .btn { align-self: flex-start; }
     }
 
     .kpi-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
       gap: 16px;
     }
     .kpi-card {
-      display: flex; align-items: center; gap: 14px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 14px;
+      row-gap: 8px;
+      align-items: start;
       padding: 18px 20px;
+      overflow: hidden;
     }
-    .kpi-card__icon { display: flex; align-items: center; color: var(--c-primary); }
-    .kpi-card__body { flex: 1; }
+    .kpi-card__icon {
+      display: flex;
+      align-items: center;
+      color: var(--c-primary);
+      grid-row: 1 / span 2;
+    }
+    .kpi-card__body { min-width: 0; grid-column: 2; }
+    .kpi-card > .badge {
+      grid-column: 2;
+      justify-self: start;
+      max-width: 100%;
+    }
     .kpi-card__value { font-size: 1.75rem; font-weight: 700; color: var(--c-slate-900); line-height: 1.1; }
     .kpi-card__label { font-size: .75rem; font-weight: 500; color: var(--c-slate-500); margin-top: 2px; text-transform: uppercase; letter-spacing: .04em; }
 
-    .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; min-width: 0; }
     @media (max-width: 900px) { .content-grid { grid-template-columns: 1fr; } }
 
     .user-chip {

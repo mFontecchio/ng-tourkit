@@ -136,5 +136,48 @@ describe('computePopoverPosition', () => {
 
     expect(result.arrow).toEqual({ side: 'left', offset: 12 });
   });
+
+  it('clamps tall popovers to the top padding when they exceed the viewport', () => {
+    const result = computePopoverPosition({
+      targetRect: { x: 100, y: 100, width: 40, height: 20 },
+      popoverSize: { width: 120, height: 500 },
+      viewport: { width: 320, height: 400 },
+      side: 'bottom',
+      align: 'center',
+      padding: 10,
+    });
+
+    expect(result.top).toBe(10);
+  });
+
+  it('includes visual viewport offsets when clamping', () => {
+    const result = computePopoverPosition({
+      targetRect: null,
+      popoverSize: { width: 100, height: 50 },
+      viewport: { width: 300, height: 400, offsetLeft: 20, offsetTop: 40 },
+      side: 'over',
+      align: 'center',
+      padding: 10,
+    });
+
+    expect(result.top).toBeGreaterThanOrEqual(50);
+    expect(result.left).toBeGreaterThanOrEqual(30);
+  });
+
+  it('keeps modal popovers inside a phone-sized viewport', () => {
+    const result = computePopoverPosition({
+      targetRect: null,
+      popoverSize: { width: 360, height: 220 },
+      viewport: { width: 390, height: 844 },
+      side: 'bottom',
+      align: 'center',
+      padding: 10,
+    });
+
+    expect(result.left).toBeGreaterThanOrEqual(10);
+    expect(result.left + 360).toBeLessThanOrEqual(380);
+    expect(result.top).toBeGreaterThanOrEqual(10);
+    expect(result.top + 220).toBeLessThanOrEqual(834);
+  });
 });
 

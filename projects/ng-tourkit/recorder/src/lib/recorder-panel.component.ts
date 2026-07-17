@@ -228,8 +228,8 @@ const sideSelectOptions: readonly TkSelectOption[] = sides.map(side => ({ value:
     `
       :host {
         position: fixed;
-        right: 16px;
-        bottom: 16px;
+        right: max(16px, env(safe-area-inset-right));
+        bottom: max(16px, env(safe-area-inset-bottom));
         z-index: 10003;
         font-size: 13px;
         line-height: 1.45;
@@ -238,8 +238,8 @@ const sideSelectOptions: readonly TkSelectOption[] = sides.map(side => ({ value:
 
       /* ── Panel shell ─────────────────────────────────────── */
       .panel {
-        width: var(--tk-recorder-width, 360px);
-        max-height: 82vh;
+        width: min(var(--tk-recorder-width, 360px), calc(100vw - 32px));
+        max-height: min(82vh, calc(100dvh - 32px));
         display: flex;
         flex-direction: column;
         border-radius: 14px;
@@ -416,13 +416,14 @@ const sideSelectOptions: readonly TkSelectOption[] = sides.map(side => ({ value:
         margin-bottom: 12px;
       }
       .form-title { font-size: 13px; font-weight: 600; color: #111827; }
-      .form-actions { display: flex; gap: 8px; margin-top: 12px; }
+      .form-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
       .target-field {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 10px;
         margin-bottom: 8px;
+        flex-wrap: wrap;
       }
       .target-selector {
         max-width: 220px;
@@ -578,11 +579,24 @@ const sideSelectOptions: readonly TkSelectOption[] = sides.map(side => ({ value:
         background: #f9fafb;
         flex-shrink: 0;
         gap: 6px;
+        flex-wrap: wrap;
       }
-      .footer-actions { display: flex; gap: 6px; }
+      .footer-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 
       /* ── Utility ─────────────────────────────────────────── */
       .row { display: flex; align-items: center; gap: 6px; }
+
+      @media (max-width: 768px) {
+        :host {
+          right: max(12px, env(safe-area-inset-right));
+          bottom: max(12px, env(safe-area-inset-bottom));
+          left: max(12px, env(safe-area-inset-left));
+        }
+        .panel {
+          width: auto;
+          max-height: min(88dvh, calc(100dvh - 24px));
+        }
+      }
     `,
   ],
 })

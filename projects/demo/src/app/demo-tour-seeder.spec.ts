@@ -73,6 +73,22 @@ describe('DemoTourSeeder', () => {
     expect(storage.savedIds).toEqual([WORKFLOW_TOUR_ID]);
   });
 
+  it('replaces a same-version copy that still uses pre-playground routes', async () => {
+    storage.tours.set(WORKFLOW_TOUR_ID, {
+      ...WORKFLOW_TOUR,
+      version: WORKFLOW_TOUR.version,
+      steps: WORKFLOW_TOUR.steps.map((step) => ({
+        ...step,
+        route: step.route?.replace(/^\/playground/, '') || '/',
+      })),
+    });
+
+    await seeder.seed();
+
+    expect(await storage.getTour(WORKFLOW_TOUR_ID)).toEqual(WORKFLOW_TOUR);
+    expect(storage.savedIds).toEqual([WORKFLOW_TOUR_ID]);
+  });
+
   it('leaves unrelated tours untouched', async () => {
     const other = { ...WORKFLOW_TOUR, id: 'user-created-tour', name: 'User-created tour' };
     storage.tours.set(other.id, other);

@@ -42,6 +42,7 @@ describe('HomePage', () => {
     expect(host.querySelector('[data-tour="workflow-tour-cta"]')).toBeTruthy();
     expect(host.querySelector('[data-tour="available-tours"]')).toBeTruthy();
     expect(host.textContent).toContain('Take the tour');
+    expect(host.querySelectorAll('.table-scroll').length).toBeGreaterThan(0);
   });
 
   it('starts the stored workflow tour from the CTA', () => {

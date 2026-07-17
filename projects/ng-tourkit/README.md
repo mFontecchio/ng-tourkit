@@ -70,6 +70,13 @@ export class ManagePage {
 For production, implement `TourStorageAdapter` and `TourAuditAdapter` against
 your API and pass them to `provideTourKit({ storage, audit })`.
 
+## Responsive / mobile
+
+Built-in surfaces (popover, recorder panel, tour manager) adapt to phone widths,
+respect `env(safe-area-inset-*)`, and track the `VisualViewport` so steps stay
+on-screen during pinch-zoom, on-screen keyboard, or collapsing mobile browser
+chrome.
+
 ## Theming
 
 Built-in UI surfaces share themable `--tk-*` CSS variables. Override accent color,

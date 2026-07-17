@@ -1,5 +1,6 @@
 import { Injectable, Signal, signal } from '@angular/core';
 
+import { listenToViewportChanges } from '../viewport/visual-viewport';
 import { StageRect } from './stage-path';
 
 export function easeInOutQuad(
@@ -36,6 +37,7 @@ export class TkStageTracker {
   private resizeObserver: ResizeObserver | null = null;
   private trackedElement: HTMLElement | null = null;
   private frameId: number | null = null;
+  private stopViewportListen: (() => void) | null = null;
   private readonly scheduleUpdate = (): void => {
     if (this.frameId !== null) {
       return;
@@ -61,7 +63,7 @@ export class TkStageTracker {
       capture: true,
       passive: true,
     });
-    window.addEventListener('resize', this.scheduleUpdate, { passive: true });
+    this.stopViewportListen = listenToViewportChanges(this.scheduleUpdate);
 
     return this.rect.asReadonly();
   }
@@ -77,7 +79,8 @@ export class TkStageTracker {
     }
 
     window.removeEventListener('scroll', this.scheduleUpdate, true);
-    window.removeEventListener('resize', this.scheduleUpdate);
+    this.stopViewportListen?.();
+    this.stopViewportListen = null;
   }
 
   private update(): void {
@@ -94,4 +97,3 @@ export class TkStageTracker {
     });
   }
 }
-

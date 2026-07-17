@@ -9,7 +9,20 @@ export class DemoTourSeeder {
   async seed(): Promise<void> {
     const stored = await this.storage.getTour(WORKFLOW_TOUR_ID);
 
-    if (!stored || stored.version < WORKFLOW_TOUR.version) {
+    // Replace when missing, older, or still using pre-playground routes from an
+    // earlier demo layout (same version number but broken step paths).
+    const needsUpdate =
+      !stored ||
+      stored.version < WORKFLOW_TOUR.version ||
+      stored.steps.some(
+        (step) =>
+          step.route === '/' ||
+          step.route === '/manage' ||
+          step.route === '/settings' ||
+          step.route === '/admin',
+      );
+
+    if (needsUpdate) {
       await this.storage.saveTour(WORKFLOW_TOUR);
     }
   }

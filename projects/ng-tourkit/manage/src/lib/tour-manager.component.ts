@@ -133,6 +133,67 @@ interface TourAuditSummary {
             </tbody>
           </table>
         </div>
+
+        <div class="tk-manage__cards">
+          @for (tour of tours(); track tour.id) {
+            <article class="tk-manage__card">
+              <div class="tk-manage__meta">
+                <button
+                  type="button"
+                  class="tk-manage__link"
+                  [attr.aria-expanded]="expandedId() === tour.id"
+                  (click)="toggleExpanded(tour.id)"
+                >
+                  {{ tour.name }}
+                </button>
+                <span class="tk-manage__badge" [class]="'tk-manage__badge--' + tour.status">{{
+                  tour.status
+                }}</span>
+                <div>Version {{ tour.version }} · {{ tour.steps.length }} steps</div>
+                <div>Updated {{ tour.updatedAt }}</div>
+                <div>
+                  {{ summary(tour.id).started }} started /
+                  {{ summary(tour.id).completed }} completed
+                </div>
+              </div>
+              <div class="tk-manage__actions">
+                <button type="button" class="tk-btn tk-btn--sm" (click)="run(tour)">Run</button>
+                <button type="button" class="tk-btn tk-btn--sm" (click)="edit.emit(tour)">Edit</button>
+                <button type="button" class="tk-btn tk-btn--sm" (click)="toggleStatus(tour)">
+                  {{ tour.status === 'published' ? 'Unpublish' : 'Publish' }}
+                </button>
+                <button type="button" class="tk-btn tk-btn--sm" (click)="archive(tour)">Archive</button>
+                <button type="button" class="tk-btn tk-btn--sm" (click)="duplicate(tour)">Duplicate</button>
+                <button type="button" class="tk-btn tk-btn--sm" (click)="exportJson(tour)">Export JSON</button>
+                <button type="button" class="tk-btn tk-btn--sm tk-btn--danger" (click)="delete(tour)">
+                  {{ pendingDeleteId() === tour.id ? 'Confirm delete?' : 'Delete' }}
+                </button>
+              </div>
+              @if (expandedId() === tour.id) {
+                <div class="tk-manage__detail tk-manage__detail--card">
+                  <h3>Audit events</h3>
+                  @if (events(tour.id).length === 0) {
+                    <p>No audit events.</p>
+                  } @else {
+                    <ul>
+                      @for (
+                        event of events(tour.id);
+                        track event.at + event.type + (event.stepId ?? '')
+                      ) {
+                        <li>
+                          <strong>{{ event.type }}</strong>
+                          <span>{{ event.userId }}</span>
+                          <span>{{ event.stepId ?? '—' }}</span>
+                          <time>{{ event.at }}</time>
+                        </li>
+                      }
+                    </ul>
+                  }
+                </div>
+              }
+            </article>
+          }
+        </div>
       }
     </section>
   `,
@@ -230,6 +291,10 @@ interface TourAuditSummary {
         width: 100%;
       }
 
+      .tk-manage__cards {
+        display: none;
+      }
+
       th,
       td {
         border-top: 1px solid var(--tk-manage-border);
@@ -279,8 +344,15 @@ interface TourAuditSummary {
         flex-wrap: wrap;
       }
 
-      .tk-manage__detail td {
+      .tk-manage__detail td,
+      .tk-manage__detail--card {
         background: var(--tk-color-surface-muted);
+      }
+
+      .tk-manage__detail--card {
+        border-radius: 8px;
+        margin-top: 0.75rem;
+        padding: 0.75rem;
       }
 
       .tk-manage__detail ul {
@@ -295,6 +367,54 @@ interface TourAuditSummary {
         display: grid;
         gap: 0.5rem;
         grid-template-columns: 9rem 8rem 8rem minmax(12rem, 1fr);
+      }
+
+      @media (max-width: 768px) {
+        .tk-manage {
+          padding: 0.75rem;
+        }
+
+        .tk-manage__header {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .tk-manage__tools {
+          flex-wrap: wrap;
+        }
+
+        .tk-manage__table-wrap {
+          display: none;
+        }
+
+        .tk-manage__cards {
+          display: grid;
+          gap: 0.75rem;
+        }
+
+        .tk-manage__card {
+          border: 1px solid var(--tk-manage-border);
+          border-radius: 10px;
+          padding: 0.75rem;
+        }
+
+        .tk-manage__meta {
+          display: grid;
+          gap: 0.4rem;
+          margin-bottom: 0.75rem;
+        }
+
+        .tk-manage__actions {
+          align-items: stretch;
+        }
+
+        .tk-manage__actions .tk-btn {
+          flex: 1 1 9rem;
+        }
+
+        .tk-manage__detail li {
+          grid-template-columns: 1fr;
+        }
       }
     `,
   ],
